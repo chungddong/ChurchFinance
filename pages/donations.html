@@ -4,20 +4,143 @@
     <meta charset="UTF-8">
     <title>헌금 등록</title>
     <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/donations.css">
 </head>
 <body style="background: #f5f6fa; overflow: auto;">
-    <div style="padding: 30px;">
-        <h2>📊 헌금 등록</h2>
-        <div class="coming-soon">
-            <p>헌금 등록 기능을 구현 중입니다.</p>
-            <p>곧 다음과 같은 기능들이 추가될 예정입니다:</p>
-            <ul style="text-align: left; display: inline-block; margin-top: 20px;">
-                <li>십일조, 감사헌금, 특별헌금 등 헌금 유형별 등록</li>
-                <li>성도별 헌금 기록 관리</li>
-                <li>헌금 영수증 출력 기능</li>
-                <li>월별/연간 헌금 통계</li>
-            </ul>
+    <div class="donation-management">
+        <!-- 헌금 등록 폼 -->
+        <div class="donation-form-section">
+            <h3>헌금 등록</h3>
+            <form id="donationForm" class="donation-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="donationType">헌금 유형 *</label>
+                        <select id="donationType" name="type" required>
+                            <option value="">헌금 유형을 선택하세요</option>
+                            <option value="십일조">십일조</option>
+                            <option value="감사헌금">감사헌금</option>
+                            <option value="특별헌금">특별헌금</option>
+                            <option value="선교헌금">선교헌금</option>
+                            <option value="건축헌금">건축헌금</option>
+                            <option value="절기헌금">절기헌금</option>
+                            <option value="기타">기타</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="donationMember">성도 선택 *</label>
+                        <select id="donationMember" name="memberId" required>
+                            <option value="">성도를 선택하세요</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="donationAmount">헌금액 *</label>
+                        <input type="number" id="donationAmount" name="amount" required min="1000" step="1000" placeholder="10000">
+                    </div>
+                    <div class="form-group">
+                        <label for="donationDate">헌금일 *</label>
+                        <input type="date" id="donationDate" name="date" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="donationMemo">메모</label>
+                        <textarea id="donationMemo" name="memo" rows="3" placeholder="기타 메모사항을 입력하세요"></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">등록</button>
+                    <button type="reset" class="btn-secondary">취소</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 헌금 목록 -->
+        <div class="donation-list-section">
+            <div class="section-header">
+                <h3>헌금 기록 목록</h3>
+                <div class="header-actions">
+                    <div class="filter-group">
+                        <select id="filterType">
+                            <option value="">전체 유형</option>
+                            <option value="십일조">십일조</option>
+                            <option value="감사헌금">감사헌금</option>
+                            <option value="특별헌금">특별헌금</option>
+                            <option value="선교헌금">선교헌금</option>
+                            <option value="건축헌금">건축헌금</option>
+                            <option value="절기헌금">절기헌금</option>
+                            <option value="기타">기타</option>
+                        </select>
+                        <select id="filterMember">
+                            <option value="">전체 성도</option>
+                        </select>
+                    </div>
+                    <div class="donation-summary">
+                        총 <span id="donationCount">0</span>건 | 
+                        합계: <span id="donationTotal">0</span>원
+                    </div>
+                </div>
+            </div>
+            <div class="donation-list" id="donationList">
+                <div class="no-donations">
+                    등록된 헌금 기록이 없습니다.
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- 헌금 정보 편집 다이얼로그 -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">헌금 정보 수정</h3>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            <form id="editDonationForm" class="donation-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editDonationType">헌금 유형 *</label>
+                        <select id="editDonationType" name="type" required>
+                            <option value="십일조">십일조</option>
+                            <option value="감사헌금">감사헌금</option>
+                            <option value="특별헌금">특별헌금</option>
+                            <option value="선교헌금">선교헌금</option>
+                            <option value="건축헌금">건축헌금</option>
+                            <option value="절기헌금">절기헌금</option>
+                            <option value="기타">기타</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDonationMember">성도 선택 *</label>
+                        <select id="editDonationMember" name="memberId" required>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editDonationAmount">헌금액 *</label>
+                        <input type="number" id="editDonationAmount" name="amount" required min="1000" step="1000">
+                    </div>
+                    <div class="form-group">
+                        <label for="editDonationDate">헌금일 *</label>
+                        <input type="date" id="editDonationDate" name="date" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editDonationMemo">메모</label>
+                        <textarea id="editDonationMemo" name="memo" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">수정</button>
+                    <button type="button" class="btn-secondary" onclick="closeEditModal()">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/donations.js"></script>
 </body>
 </html>

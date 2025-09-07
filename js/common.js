@@ -6,8 +6,11 @@ class DataService {
     constructor() {
         this.dataDir = __dirname;
         this.membersFile = path.join(this.dataDir, 'members.json');
+        this.donationsFile = path.join(this.dataDir, 'donations.json');
         this.members = [];
+        this.donations = [];
         this.loadMembers();
+        this.loadDonations();
     }
 
     // 성도 데이터 로드
@@ -74,6 +77,90 @@ class DataService {
     // 전체 성도 목록 반환
     getMembers() {
         return [...this.members];
+    }
+
+    // 헌금 데이터 로드
+    loadDonations() {
+        try {
+            if (fs.existsSync(this.donationsFile)) {
+                const data = fs.readFileSync(this.donationsFile, 'utf8');
+                this.donations = JSON.parse(data);
+            } else {
+                this.donations = [];
+            }
+            return this.donations;
+        } catch (error) {
+            console.error('헌금 데이터 로드 오류:', error);
+            this.donations = [];
+            return this.donations;
+        }
+    }
+
+    // 헌금 데이터 저장
+    saveDonations() {
+        try {
+            fs.writeFileSync(this.donationsFile, JSON.stringify(this.donations, null, 2), 'utf8');
+            return true;
+        } catch (error) {
+            console.error('헌금 데이터 저장 오류:', error);
+            return false;
+        }
+    }
+
+    // 헌금 추가
+    addDonation(donationData) {
+        const newDonation = {
+            ...donationData,
+            id: Date.now(),
+            recordedAt: new Date().toISOString()
+        };
+        
+        this.donations.push(newDonation);
+        return this.saveDonations() ? newDonation : null;
+    }
+
+    // 헌금 수정
+    updateDonation(index, donationData) {
+        if (index >= 0 && index < this.donations.length) {
+            this.donations[index] = {
+                ...this.donations[index],
+                ...donationData
+            };
+            return this.saveDonations();
+        }
+        return false;
+    }
+
+    // 헌금 삭제
+    deleteDonation(index) {
+        if (index >= 0 && index < this.donations.length) {
+            this.donations.splice(index, 1);
+            return this.saveDonations();
+        }
+        return false;
+    }
+
+    // 전체 헌금 목록 반환
+    getDonations() {
+        return [...this.donations];
+    }
+
+    // 특정 성도의 헌금 기록 반환
+    getMemberDonations(memberId) {
+        return this.donations.filter(donation => donation.memberId === memberId);
+    }
+
+    // 헌금 유형별 통계
+    getDonationsByType(type, startDate, endDate) {
+        return this.donations.filter(donation => {
+            const donationDate = new Date(donation.date);
+            const start = startDate ? new Date(startDate) : new Date(0);
+            const end = endDate ? new Date(endDate) : new Date();
+            
+            return donation.type === type && 
+                   donationDate >= start && 
+                   donationDate <= end;
+        });
     }
 }
 
