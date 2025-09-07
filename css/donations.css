@@ -333,15 +333,16 @@
     right: 20px;
     background: #27ae60;
     color: white;
-    padding: 10px 15px;
-    border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    padding: 8px 12px;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     z-index: 1001;
     opacity: 0;
     transform: translateY(-20px);
     transition: all 0.3s ease;
-    max-width: 280px;
-    font-size: 14px;
+    max-width: 250px;
+    font-size: 13px;
+    line-height: 1.3;
 }
 
 .toast.show {
