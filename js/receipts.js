@@ -411,9 +411,13 @@ function exportToExcel() {
     
     console.log('Excel export - Selected data:', selectedData);
     
+    // Get church info
+    const churchInfo = getChurchInfo();
+    const churchName = churchInfo ? churchInfo.name : '00교회';
+    
     // Create worksheet data
     const worksheetData = [
-        ['00교회 기부금 영수증'],
+        [`${churchName} 기부금 영수증`],
         [''],
         [`발급대상: ${member.name}님`],
         [`연락처: ${member.phone || '-'}`],
@@ -563,7 +567,7 @@ function exportToPDF() {
         <body>
             <div class="receipt-container">
                 <div class="receipt-header">
-                    <h1 class="church-name">00교회</h1>
+                    <h1 class="church-name">${getChurchInfo() ? getChurchInfo().name : '00교회'}</h1>
                     <h2 class="receipt-title">기부금 영수증</h2>
                     <div class="receipt-info">발급일자: ${issueDate}</div>
                 </div>
@@ -601,7 +605,7 @@ function exportToPDF() {
                 </table>
                 
                 <div class="footer">
-                    <div>00교회 재정관리 시스템</div>
+                    <div>${getChurchInfo() ? getChurchInfo().name : '00교회'} 재정관리 시스템</div>
                     <div>발급일: ${new Date().toLocaleString('ko-KR')}</div>
                 </div>
             </div>
@@ -622,6 +626,39 @@ function exportToPDF() {
             showToast('기부금 영수증이 출력되었습니다.');
         }, 500);
     };
+}
+
+// Helper functions to get settings
+function getChurchInfo() {
+    try {
+        if (window.parent && window.parent.getChurchInfo) {
+            return window.parent.getChurchInfo();
+        } else if (window.getChurchInfo) {
+            return window.getChurchInfo();
+        } else {
+            const saved = localStorage.getItem('churchInfo');
+            return saved ? JSON.parse(saved) : { name: '00교회' };
+        }
+    } catch (error) {
+        console.error('Error getting church info:', error);
+        return { name: '00교회' };
+    }
+}
+
+function getDonationTypes() {
+    try {
+        if (window.parent && window.parent.getDonationTypes) {
+            return window.parent.getDonationTypes();
+        } else if (window.getDonationTypes) {
+            return window.getDonationTypes();
+        } else {
+            const saved = localStorage.getItem('donationTypes');
+            return saved ? JSON.parse(saved) : ['십일조', '감사헌금', '특별헌금', '선교헌금', '건축헌금', '절기헌금', '기타'];
+        }
+    } catch (error) {
+        console.error('Error getting donation types:', error);
+        return ['십일조', '감사헌금', '특별헌금', '선교헌금', '건축헌금', '절기헌금', '기타'];
+    }
 }
 
 function showToast(message, type = 'success') {

@@ -4,21 +4,175 @@
     <meta charset="UTF-8">
     <title>설정</title>
     <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/settings.css">
 </head>
 <body style="background: #f5f6fa; overflow: auto;">
-    <div style="padding: 30px;">
-        <h2>⚙️ 설정</h2>
-        <div class="coming-soon">
-            <p>설정 기능을 구현 중입니다.</p>
-            <p>곧 다음과 같은 기능들이 추가될 예정입니다:</p>
-            <ul style="text-align: left; display: inline-block; margin-top: 20px;">
-                <li>교회 정보 설정</li>
-                <li>헌금 유형 관리</li>
-                <li>데이터 백업 및 복원</li>
-                <li>프로그램 업데이트</li>
-                <li>사용자 권한 관리</li>
-            </ul>
+    <div class="settings-container">
+        
+        <!-- 교회 정보 설정 -->
+        <div class="settings-section">
+            <div class="section-header">
+                <h3>교회 정보 설정</h3>
+                <p>교회 기본 정보를 설정합니다.</p>
+            </div>
+            <div class="section-content">
+                <form id="churchInfoForm" class="church-info-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="churchName">교회명 *</label>
+                            <input type="text" id="churchName" name="name" required placeholder="교회 이름을 입력하세요">
+                        </div>
+                        <div class="form-group">
+                            <label for="churchPhone">연락처</label>
+                            <input type="tel" id="churchPhone" name="phone" placeholder="02-123-4567">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="churchAddress">주소</label>
+                            <input type="text" id="churchAddress" name="address" placeholder="교회 주소를 입력하세요">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="pastorName">담임목사님</label>
+                            <input type="text" id="pastorName" name="pastor" placeholder="담임목사님 성함을 입력하세요">
+                        </div>
+                        <div class="form-group">
+                            <label for="churchEmail">이메일</label>
+                            <input type="email" id="churchEmail" name="email" placeholder="church@example.com">
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">저장</button>
+                        <button type="button" class="btn-secondary" onclick="resetChurchInfo()">초기화</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 헌금 유형 관리 -->
+        <div class="settings-section">
+            <div class="section-header">
+                <h3>헌금 유형 관리</h3>
+                <p>헌금 유형을 추가, 수정, 삭제할 수 있습니다.</p>
+            </div>
+            <div class="section-content">
+                <div class="donation-types-management">
+                    <div class="add-type-section">
+                        <div class="add-type-form">
+                            <input type="text" id="newDonationType" placeholder="새 헌금 유형 입력" maxlength="20">
+                            <button class="btn-add" onclick="addDonationType()">추가</button>
+                        </div>
+                    </div>
+                    <div class="types-list-section">
+                        <h4>현재 헌금 유형 목록</h4>
+                        <div class="types-list" id="donationTypesList">
+                            <!-- 헌금 유형 목록이 여기에 동적으로 생성됩니다 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 데이터 백업 및 복원 -->
+        <div class="settings-section">
+            <div class="section-header">
+                <h3>데이터 백업 및 복원</h3>
+                <p>성도 및 헌금 데이터를 백업하거나 복원할 수 있습니다.</p>
+            </div>
+            <div class="section-content">
+                <div class="backup-restore-section">
+                    <div class="backup-section">
+                        <h4>데이터 백업</h4>
+                        <p>현재 모든 데이터를 JSON 파일로 내보냅니다.</p>
+                        <div class="backup-actions">
+                            <button class="btn-backup" onclick="exportAllData()">
+                                <span class="icon">📦</span>
+                                전체 데이터 내보내기
+                            </button>
+                            <button class="btn-backup" onclick="exportMembersOnly()">
+                                <span class="icon">👥</span>
+                                성도 데이터만 내보내기
+                            </button>
+                            <button class="btn-backup" onclick="exportDonationsOnly()">
+                                <span class="icon">💰</span>
+                                헌금 데이터만 내보내기
+                            </button>
+                        </div>
+                    </div>
+                    <div class="restore-section">
+                        <h4>데이터 복원</h4>
+                        <p>백업된 데이터 파일을 불러와서 복원합니다.</p>
+                        <div class="restore-actions">
+                            <input type="file" id="restoreFile" accept=".json" style="display: none;" onchange="importData()">
+                            <button class="btn-restore" onclick="document.getElementById('restoreFile').click()">
+                                <span class="icon">📁</span>
+                                데이터 파일 선택
+                            </button>
+                            <p class="warning-text">⚠️ 복원 시 기존 데이터가 덮어쓰기됩니다. 신중히 진행하세요.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 프로그램 정보 -->
+        <div class="settings-section">
+            <div class="section-header">
+                <h3>프로그램 정보</h3>
+                <p>Church Finance Management System 정보</p>
+            </div>
+            <div class="section-content">
+                <div class="program-info">
+                    <div class="info-item">
+                        <label>프로그램명</label>
+                        <span>Church Finance Management System</span>
+                    </div>
+                    <div class="info-item">
+                        <label>버전</label>
+                        <span>v1.0.0</span>
+                    </div>
+                    <div class="info-item">
+                        <label>개발자</label>
+                        <span>서충만 with Claude</span>
+                    </div>
+                    <div class="info-item">
+                        <label>설명</label>
+                        <span>교회 성도 관리 및 헌금 관리를 위한 통합 시스템입니다. 성도 정보 관리, 헌금 등록, 통계 조회, 기부금 영수증 발급 기능을 제공합니다.</span>
+                    </div>
+                    <div class="info-item">
+                        <label>기술 스택</label>
+                        <span>Electron, HTML, CSS, JavaScript</span>
+                    </div>
+                    <div class="info-item">
+                        <label>라이선스</label>
+                        <span>MIT License</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- 헌금 유형 편집 다이얼로그 -->
+    <div class="modal-overlay" id="editTypeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">헌금 유형 수정</h3>
+                <button class="close-btn" onclick="closeEditTypeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="editTypeName" placeholder="헌금 유형명" maxlength="20">
+                <input type="hidden" id="editTypeIndex">
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="updateDonationType()">저장</button>
+                <button class="btn-secondary" onclick="closeEditTypeModal()">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/common.js"></script>
+    <script src="../js/settings.js"></script>
 </body>
 </html>
