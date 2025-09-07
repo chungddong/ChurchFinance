@@ -1,5 +1,6 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const path = require('path')
+const fs = require('fs')
 
 function createWindow () {
   const mainWindow = new BrowserWindow({
@@ -7,11 +8,13 @@ function createWindow () {
     height: 800,
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false
+      contextIsolation: false,
+      webSecurity: false
     }
   })
 
   mainWindow.loadFile('index.html')
+  mainWindow.webContents.openDevTools()
 }
 
 app.whenReady().then(() => {
@@ -25,3 +28,4 @@ app.whenReady().then(() => {
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
 })
+

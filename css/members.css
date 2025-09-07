@@ -1,0 +1,414 @@
+/* Member Management Styles */
+.member-management {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 30px;
+    height: 100%;
+}
+
+.member-form-section, .member-list-section {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+}
+
+.member-form-section h3, .member-list-section h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.3em;
+}
+
+.member-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+}
+
+.form-group input, .form-group textarea {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+.form-group input:required {
+    border-left: 3px solid #ff6b6b;
+}
+
+.form-group input:valid {
+    border-left: 3px solid #51cf66;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.btn-primary, .btn-secondary, .btn-danger {
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #5a67d8;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: #e9ecef;
+    color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background: #dee2e6;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.member-count {
+    background: #667eea;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.member-list {
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.no-members {
+    text-align: center;
+    color: #999;
+    padding: 40px;
+    font-style: italic;
+}
+
+.member-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: clamp(0.7em, 0.5em + 1vw, 0.9em);
+    table-layout: fixed;
+    min-width: 0;
+}
+
+.member-table th {
+    background: #f8f9fa;
+    padding: clamp(8px, 1vw, 12px) clamp(4px, 0.5vw, 8px);
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #e9ecef;
+    position: sticky;
+    top: 0;
+    font-size: 1em;
+    z-index: 10;
+}
+
+.member-table th:nth-child(1) { width: 12%; } /* 이름 */
+.member-table th:nth-child(2) { width: 18%; } /* 연락처 */
+.member-table th:nth-child(3) { width: 22%; } /* 주소 */
+.member-table th:nth-child(4) { width: 20%; } /* 메모 */
+.member-table th:nth-child(5) { width: 12%; } /* 등록일 */
+.member-table th:nth-child(6) { width: 6%; }  /* 관리 */
+
+.member-table td {
+    padding: clamp(8px, 1vw, 12px) clamp(4px, 0.5vw, 8px);
+    border-bottom: 1px solid #f1f3f4;
+    color: #777;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    vertical-align: top;
+    min-width: 0;
+    max-width: 0;
+}
+
+.memo-cell {
+    max-height: 40px;
+    overflow: hidden;
+    line-height: 1.3;
+    position: relative;
+    word-break: break-all;
+    hyphens: auto;
+    z-index: 1;
+}
+
+.memo-cell.expanded {
+    max-height: none;
+}
+
+.memo-text {
+    display: block;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.memo-toggle {
+    color: #667eea;
+    cursor: pointer;
+    font-size: clamp(0.6em, 0.7vw, 0.8em);
+    text-decoration: underline;
+    margin-top: 3px;
+    display: inline-block;
+}
+
+.member-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.member-name-cell {
+    font-weight: 600;
+    color: #333;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 3px;
+    justify-content: center;
+}
+
+.btn-edit, .btn-danger {
+    width: clamp(20px, 2vw, 28px);
+    height: clamp(20px, 2vw, 28px);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(10px, 1.2vw, 14px);
+    transition: all 0.2s ease;
+}
+
+.btn-edit {
+    background: #28a745;
+    color: white;
+}
+
+.btn-edit:hover {
+    background: #218838;
+    transform: scale(1.1);
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+    transform: scale(1.1);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .member-management {
+        grid-template-columns: 1fr 1.5fr;
+        gap: 20px;
+    }
+    
+    .member-table {
+        font-size: clamp(0.65em, 0.4em + 1vw, 0.8em);
+    }
+}
+
+@media (max-width: 900px) {
+    .member-management {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .member-form-section {
+        order: 2;
+    }
+    
+    .member-list-section {
+        order: 1;
+    }
+    
+    .member-table th:nth-child(3) { width: 20%; } /* 주소 줄임 */
+    .member-table th:nth-child(4) { width: 32%; } /* 메모 늘림 */
+}
+
+@media (max-width: 600px) {
+    .content {
+        padding: 15px;
+    }
+    
+    .member-form-section, .member-list-section {
+        padding: 15px;
+    }
+    
+    .member-table {
+        font-size: clamp(0.6em, 0.3em + 1.5vw, 0.75em);
+    }
+    
+    .member-table th:nth-child(1) { width: 15%; } /* 이름 */
+    .member-table th:nth-child(2) { width: 20%; } /* 연락처 */
+    .member-table th:nth-child(3) { width: 18%; } /* 주소 */
+    .member-table th:nth-child(4) { width: 30%; } /* 메모 */
+    .member-table th:nth-child(5) { width: 10%; } /* 등록일 */
+    .member-table th:nth-child(6) { width: 7%; }  /* 관리 */
+}
+
+.btn-print {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-print:hover {
+    background: #545b62;
+    transform: translateY(-1px);
+}
+
+/* 인쇄용 스타일 */
+@media print {
+    body {
+        background: white !important;
+        font-family: 'Malgun Gothic', sans-serif;
+    }
+
+    .print-container {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 20px;
+        background: white;
+    }
+
+    .print-header {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #333;
+        padding-bottom: 20px;
+    }
+
+    .print-header h1 {
+        font-size: 24px;
+        margin: 0 0 10px 0;
+        color: #333;
+    }
+
+    .print-info {
+        font-size: 14px;
+        color: #777;
+        margin: 5px 0;
+    }
+
+    .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        margin-top: 20px;
+    }
+
+    .print-table th,
+    .print-table td {
+        border: 1px solid #333;
+        padding: 8px;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .print-table th {
+        background: #f0f0f0;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .print-table td {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .print-table .number-col { width: 8%; text-align: center; }
+    .print-table .name-col { width: 15%; }
+    .print-table .phone-col { width: 18%; }
+    .print-table .address-col { width: 25%; }
+    .print-table .memo-col { width: 25%; }
+    .print-table .date-col { width: 12%; text-align: center; }
+
+    .print-footer {
+        margin-top: 30px;
+        text-align: right;
+        font-size: 12px;
+        color: #777;
+        border-top: 1px solid #ccc;
+        padding-top: 15px;
+    }
+
+    /* 인쇄 시 숨길 요소들 */
+    .no-print {
+        display: none !important;
+    }
+
+    /* 페이지 설정 */
+    @page {
+        margin: 2cm;
+        size: A4;
+    }
+}

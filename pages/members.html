@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>성도 관리</title>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/members.css">
+</head>
+<body style="background: #f5f6fa; overflow: auto;">
+    <div class="member-management">
+        <!-- 성도 등록 폼 -->
+        <div class="member-form-section">
+            <h3>새 성도 등록</h3>
+            <form id="memberForm" class="member-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="memberName">이름 *</label>
+                        <input type="text" id="memberName" name="name" required placeholder="성도 이름을 입력하세요">
+                    </div>
+                    <div class="form-group">
+                        <label for="memberPhone">연락처 *</label>
+                        <input type="tel" id="memberPhone" name="phone" required placeholder="010-1234-5678">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="memberAddress">주소</label>
+                        <input type="text" id="memberAddress" name="address" placeholder="주소를 입력하세요">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="memberMemo">메모</label>
+                        <textarea id="memberMemo" name="memo" rows="3" placeholder="기타 메모사항을 입력하세요"></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">등록</button>
+                    <button type="reset" class="btn-secondary">취소</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 성도 목록 -->
+        <div class="member-list-section">
+            <div class="section-header">
+                <h3>등록된 성도 목록</h3>
+                <div class="header-actions">
+                    <div class="member-count">총 <span id="memberCount">0</span>명</div>
+                </div>
+            </div>
+            <div class="member-list" id="memberList">
+                <div class="no-members">
+                    등록된 성도가 없습니다.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 성도 정보 편집 다이얼로그 -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">성도 정보 수정</h3>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            <form id="editMemberForm" class="member-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editMemberName">이름 *</label>
+                        <input type="text" id="editMemberName" name="name" required placeholder="성도 이름을 입력하세요">
+                    </div>
+                    <div class="form-group">
+                        <label for="editMemberPhone">연락처 *</label>
+                        <input type="tel" id="editMemberPhone" name="phone" required placeholder="010-1234-5678">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editMemberAddress">주소</label>
+                        <input type="text" id="editMemberAddress" name="address" placeholder="주소를 입력하세요">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editMemberMemo">메모</label>
+                        <textarea id="editMemberMemo" name="memo" rows="3" placeholder="기타 메모사항을 입력하세요"></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">수정</button>
+                    <button type="button" class="btn-secondary" onclick="closeEditModal()">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/members.js"></script>
+</body>
+</html>
