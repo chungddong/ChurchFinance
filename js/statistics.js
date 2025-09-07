@@ -21,7 +21,11 @@ function loadData() {
     }
     
     populateMemberDropdown();
-    resetFilters();
+    
+    // 기본값을 이번달로 설정하고 자동 조회
+    document.getElementById('periodType').value = 'thisMonth';
+    handlePeriodChange();
+    applyFilters();
 }
 
 // 성도 드롭다운 채우기
@@ -118,13 +122,11 @@ function applyFilters() {
 
 // 필터 초기화
 function resetFilters() {
-    document.getElementById('periodType').value = 'custom';
-    document.getElementById('startDate').value = '';
-    document.getElementById('endDate').value = '';
+    document.getElementById('periodType').value = 'thisMonth';
     document.getElementById('filterType').value = '';
     document.getElementById('filterMember').value = '';
     
-    handlePeriodChange();
+    handlePeriodChange(); // 이번달로 날짜 설정
     filteredDonations = [...donations];
     updateDisplay();
 }
@@ -148,8 +150,8 @@ function updateStatisticsTable() {
         return;
     }
     
-    // 날짜순 정렬 (최신순)
-    const sortedDonations = [...filteredDonations].sort((a, b) => new Date(b.date) - new Date(a.date));
+    // 날짜순 정렬 (빠른날이 먼저)
+    const sortedDonations = [...filteredDonations].sort((a, b) => new Date(a.date) - new Date(b.date));
     
     const tableHTML = `
         <table class="statistics-table">
@@ -302,48 +304,57 @@ function exportToExcel() {
     }
     
     try {
-        // CSV 형식으로 데이터 생성
-        const headers = ['날짜', '헌금유형', '성도명', '헌금액', '메모', '등록일시'];
-        const csvContent = [
-            headers.join(','),
-            ...filteredDonations.map(donation => {
+        // 날짜순 정렬 (빠른날이 먼저)
+        const sortedDonations = [...filteredDonations].sort((a, b) => new Date(a.date) - new Date(b.date));
+        
+        // Excel 데이터 생성
+        const worksheetData = [
+            // 헤더
+            ['날짜', '헌금유형', '성도명', '헌금액', '메모', '등록일시'],
+            // 데이터
+            ...sortedDonations.map(donation => {
                 const member = members.find(m => m.id == donation.memberId);
                 const memberName = member ? member.name : '알 수 없음';
-                const memo = (donation.memo || '').replace(/,/g, ';'); // 쉼표를 세미콜론으로 치환
                 
                 return [
                     new Date(donation.date).toLocaleDateString('ko-KR'),
                     donation.type,
                     memberName,
                     donation.amount,
-                    memo,
+                    donation.memo || '',
                     new Date(donation.recordedAt).toLocaleString('ko-KR')
-                ].join(',');
+                ];
             })
-        ].join('\\n');
+        ];
         
-        // BOM 추가 (한글 깨짐 방지)
-        const BOM = '\\uFEFF';
-        const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+        // Excel 워크시트 생성
+        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
         
-        // 다운로드 링크 생성
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
+        // 컬럼 너비 설정
+        worksheet['!cols'] = [
+            { width: 12 }, // 날짜
+            { width: 12 }, // 헌금유형
+            { width: 15 }, // 성도명
+            { width: 15 }, // 헌금액
+            { width: 30 }, // 메모
+            { width: 20 }  // 등록일시
+        ];
         
+        // 워크북 생성
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, '헌금통계');
+        
+        // 파일명 생성
         const currentDate = new Date().toISOString().split('T')[0];
-        link.setAttribute('download', `헌금통계_${currentDate}.csv`);
+        const fileName = `헌금통계_${currentDate}.xlsx`;
         
-        // 다운로드 실행
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Excel 파일 다운로드
+        XLSX.writeFile(workbook, fileName);
         
         showToast('엑셀 파일이 다운로드되었습니다.', 'success');
     } catch (error) {
         console.error('엑셀 다운로드 오류:', error);
-        showToast('엑셀 다운로드 중 오류가 발생했습니다.', 'error');
+        showToast('엑셀 다운로드를 위해 XLSX 라이브러리가 필요합니다.', 'error');
     }
 }
 
@@ -398,7 +409,7 @@ function generatePDFContent() {
     
     // 테이블 행 생성
     const tableRows = filteredDonations
-        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
         .map((donation, index) => {
             const member = members.find(m => m.id == donation.memberId);
             const memberName = member ? member.name : '알 수 없음';
@@ -407,7 +418,7 @@ function generatePDFContent() {
             <tr>
                 <td class="number-col">${index + 1}</td>
                 <td class="date-col">${new Date(donation.date).toLocaleDateString('ko-KR')}</td>
-                <td class="type-col type-${donation.type}">${donation.type}</td>
+                <td class="type-col">${donation.type}</td>
                 <td class="member-col">${memberName}</td>
                 <td class="amount-col">${donation.amount.toLocaleString()}원</td>
                 <td class="memo-col">${donation.memo || '-'}</td>
@@ -507,14 +518,6 @@ function generatePDFContent() {
                 .member-col { width: 12%; }
                 .amount-col { width: 15%; text-align: right; font-weight: bold; }
                 .memo-col { width: 43%; }
-                
-                .type-십일조 { color: #3498db; }
-                .type-감사헌금 { color: #e74c3c; }
-                .type-특별헌금 { color: #f39c12; }
-                .type-선교헌금 { color: #9b59b6; }
-                .type-건축헌금 { color: #1abc9c; }
-                .type-절기헌금 { color: #e67e22; }
-                .type-기타 { color: #95a5a6; }
                 
                 .footer {
                     margin-top: 30px;
