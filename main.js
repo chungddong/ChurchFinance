@@ -14,7 +14,7 @@ function createWindow () {
   })
 
   mainWindow.loadFile('index.html')
-  mainWindow.webContents.openDevTools()
+  //mainWindow.webContents.openDevTools() // 개발자 도구 열기
 }
 
 app.whenReady().then(() => {

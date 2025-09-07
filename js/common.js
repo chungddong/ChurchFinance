@@ -79,6 +79,16 @@ class DataService {
         return [...this.members];
     }
 
+    // 전체 성도 목록 반환 (별칭)
+    getAllMembers() {
+        return this.getMembers();
+    }
+
+    // ID로 성도 검색
+    getMemberById(id) {
+        return this.members.find(member => member.id == id);
+    }
+
     // 헌금 데이터 로드
     loadDonations() {
         try {
@@ -147,7 +157,19 @@ class DataService {
 
     // 특정 성도의 헌금 기록 반환
     getMemberDonations(memberId) {
-        return this.donations.filter(donation => donation.memberId === memberId);
+        console.log('getMemberDonations called with:', memberId, typeof memberId);
+        console.log('All donations:', this.donations);
+        const result = this.donations.filter(donation => {
+            console.log('Comparing:', donation.memberId, typeof donation.memberId, 'with', memberId, typeof memberId);
+            return donation.memberId == memberId; // Use == instead of === for type coercion
+        });
+        console.log('getMemberDonations result:', result);
+        return result;
+    }
+
+    // 특정 성도의 헌금 기록 반환 (별칭)
+    getDonationsByMember(memberId) {
+        return this.getMemberDonations(memberId);
     }
 
     // 헌금 유형별 통계
@@ -395,6 +417,9 @@ function loadPage(pageName) {
             break;
         case 'statistics':
             content.innerHTML = '<iframe src="pages/statistics.html" style="width:100%;height:100%;border:none;"></iframe>';
+            break;
+        case 'receipts':
+            content.innerHTML = '<iframe src="pages/receipts.html" style="width:100%;height:100%;border:none;"></iframe>';
             break;
         case 'members':
             content.innerHTML = '<iframe src="pages/members.html" style="width:100%;height:100%;border:none;"></iframe>';
