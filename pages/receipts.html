@@ -18,14 +18,14 @@
                 <div class="filter-row">
                     <div class="filter-group">
                         <label>성도 선택 *</label>
-                        <select id="memberSelect" onchange="loadMemberDonations()">
+                        <select id="memberSelect">
                             <option value="">성도를 선택하세요</option>
                         </select>
                     </div>
                     
                     <div class="filter-group">
                         <label>기간 설정</label>
-                        <select id="periodType" onchange="handlePeriodChange()">
+                        <select id="periodType">
                             <option value="thisYear" selected>올해</option>
                             <option value="lastYear">작년</option>
                             <option value="custom">사용자 지정</option>
@@ -48,22 +48,15 @@
                         <label>헌금 유형</label>
                         <select id="filterType">
                             <option value="">전체 유형</option>
-                            <option value="십일조">십일조</option>
-                            <option value="감사헌금">감사헌금</option>
-                            <option value="특별헌금">특별헌금</option>
-                            <option value="선교헌금">선교헌금</option>
-                            <option value="건축헌금">건축헌금</option>
-                            <option value="절기헌금">절기헌금</option>
-                            <option value="기타">기타</option>
                         </select>
                     </div>
                     
                     <div class="filter-group button-group">
-                        <button class="btn-filter" onclick="applyFilters()">조회</button>
+                        <button class="btn-filter" id="applyFiltersBtn">조회</button>
                     </div>
                     
                     <div class="filter-group button-group">
-                        <button class="btn-reset" onclick="resetFilters()">초기화</button>
+                        <button class="btn-reset" id="resetFiltersBtn">초기화</button>
                     </div>
                 </div>
             </div>
@@ -81,17 +74,17 @@
                 <div class="table-header-right">
                     <div class="selection-controls">
                         <label class="checkbox-wrapper">
-                            <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                            <input type="checkbox" id="selectAll">
                             <span class="checkmark"></span>
                             전체선택
                         </label>
                         <span class="selected-count" id="selectedCount">0개 선택</span>
                     </div>
                     <div class="export-buttons">
-                        <button class="btn-export excel" onclick="exportToExcel()" disabled id="excelBtn">
+                        <button class="btn-export excel" disabled id="exportExcel">
                             엑셀
                         </button>
-                        <button class="btn-export pdf" onclick="exportToPDF()" disabled id="pdfBtn">
+                        <button class="btn-export pdf" disabled id="exportPDF">
                             PDF
                         </button>
                     </div>

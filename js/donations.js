@@ -21,6 +21,7 @@ function loadData() {
     }
     
     populateMemberDropdowns();
+    populateDonationTypeDropdowns();
     displayDonations();
 }
 
@@ -47,6 +48,52 @@ function populateMemberDropdowns() {
             option.textContent = `${member.name} (${member.phone})`;
             dropdown.appendChild(option);
         });
+    });
+}
+
+// 헌금 유형 드롭다운 채우기
+function populateDonationTypeDropdowns() {
+    // localStorage에서 직접 헌금 유형 읽기
+    let donationTypes = [];
+    try {
+        const saved = localStorage.getItem('donationTypes');
+        donationTypes = saved ? JSON.parse(saved) : ['십일조', '감사헌금', '특별헌금', '선교헌금', '건축헌금', '절기헌금', '기타'];
+    } catch (error) {
+        console.error('Error getting donation types:', error);
+        donationTypes = ['십일조', '감사헌금', '특별헌금', '선교헌금', '건축헌금', '절기헌금', '기타'];
+    }
+    
+    const dropdowns = [
+        document.getElementById('donationType'),
+        document.getElementById('editDonationType'),
+        document.getElementById('filterType')
+    ];
+    
+    dropdowns.forEach(dropdown => {
+        if (!dropdown) return;
+        
+        // 현재 선택된 값 저장
+        const currentValue = dropdown.value;
+        
+        // 기본 옵션만 남기고 모든 옵션 제거
+        const firstOption = dropdown.querySelector('option');
+        dropdown.innerHTML = '';
+        if (firstOption) {
+            dropdown.appendChild(firstOption);
+        }
+        
+        // 헌금 유형 목록 추가
+        donationTypes.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type;
+            option.textContent = type;
+            dropdown.appendChild(option);
+        });
+        
+        // 이전 선택값 복원
+        if (currentValue && donationTypes.includes(currentValue)) {
+            dropdown.value = currentValue;
+        }
     });
 }
 
@@ -371,9 +418,24 @@ document.addEventListener('DOMContentLoaded', function() {
         if (dataService) {
             const currentMembers = dataService.getMembers();
             const currentDonations = dataService.getDonations();
+            const currentDonationTypes = getDonationTypes();
             
             if (currentMembers.length !== members.length || currentDonations.length !== donations.length) {
                 loadData();
+            }
+            
+            // 헌금 유형이 변경된 경우 드롭다운 업데이트
+            try {
+                const saved = localStorage.getItem('donationTypes');
+                const currentDonationTypes = saved ? JSON.parse(saved) : [];
+                const lastKnownTypes = window.lastKnownDonationTypes || [];
+                
+                if (JSON.stringify(currentDonationTypes) !== JSON.stringify(lastKnownTypes)) {
+                    window.lastKnownDonationTypes = currentDonationTypes;
+                    populateDonationTypeDropdowns();
+                }
+            } catch (error) {
+                console.error('Error checking donation types changes:', error);
             }
         }
     }, 2000); // 2초마다 확인

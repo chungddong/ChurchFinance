@@ -136,10 +136,10 @@ function displayDonationTypes() {
             <span class="type-name">${type}</span>
             <div class="type-actions">
                 <button class="btn-edit-type" onclick="editDonationType(${index})" title="수정">
-                    ✏️
+                    ✎
                 </button>
                 <button class="btn-delete-type" onclick="deleteDonationType(${index})" title="삭제">
-                    🗑️
+                    ✕
                 </button>
             </div>
         </div>

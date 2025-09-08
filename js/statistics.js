@@ -82,16 +82,19 @@ function updateUIForDataType() {
         typeStatsTitle.textContent = '헌금 유형별 통계';
         monthlyStatsTitle.textContent = '월별 헌금 현황';
         
-        // 헌금 유형 옵션 설정
+        // localStorage에서 직접 헌금 유형 읽기
+        let donationTypes = [];
+        try {
+            const saved = localStorage.getItem('donationTypes');
+            donationTypes = saved ? JSON.parse(saved) : ['십일조', '감사헌금', '특별헌금', '선교헌금', '건축헌금', '절기헌금', '기타'];
+        } catch (error) {
+            console.error('Error getting donation types:', error);
+            donationTypes = ['십일조', '감사헌금', '특별헌금', '선교헌금', '건축헌금', '절기헌금', '기타'];
+        }
+        
         filterType.innerHTML = `
             <option value="">전체 유형</option>
-            <option value="십일조">십일조</option>
-            <option value="감사헌금">감사헌금</option>
-            <option value="특별헌금">특별헌금</option>
-            <option value="선교헌금">선교헌금</option>
-            <option value="건축헌금">건축헌금</option>
-            <option value="절기헌금">절기헌금</option>
-            <option value="기타">기타</option>
+            ${donationTypes.map(type => `<option value="${type}">${type}</option>`).join('')}
         `;
     } else if (currentDataType === 'expense') {
         filterTypeLabel.textContent = '지출 분류';
@@ -127,16 +130,20 @@ function updateUIForDataType() {
         typeStatsTitle.textContent = '항목별 통계';
         monthlyStatsTitle.textContent = '월별 재정 현황';
         
-        // 전체 분류 옵션 설정
+        // localStorage에서 직접 헌금 유형 읽기
+        let donationTypes = [];
+        try {
+            const saved = localStorage.getItem('donationTypes');
+            donationTypes = saved ? JSON.parse(saved) : ['십일조', '감사헌금', '특별헌금', '선교헌금', '건축헌금', '절기헌금', '기타'];
+        } catch (error) {
+            console.error('Error getting donation types:', error);
+            donationTypes = ['십일조', '감사헌금', '특별헌금', '선교헌금', '건축헌금', '절기헌금', '기타'];
+        }
+        
         filterType.innerHTML = `
             <option value="">전체 항목</option>
             <optgroup label="헌금 유형">
-                <option value="십일조">십일조</option>
-                <option value="감사헌금">감사헌금</option>
-                <option value="특별헌금">특별헌금</option>
-                <option value="선교헌금">선교헌금</option>
-                <option value="건축헌금">건축헌금</option>
-                <option value="절기헌금">절기헌금</option>
+                ${donationTypes.map(type => `<option value="${type}">${type}</option>`).join('')}
             </optgroup>
             <optgroup label="지출 분류">
                 <option value="시설관리">시설관리</option>
@@ -1172,6 +1179,20 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (currentDonations.length !== donations.length || currentMembers.length !== members.length) {
                 loadData();
+            }
+            
+            // 헌금 유형이 변경된 경우 UI 업데이트
+            try {
+                const saved = localStorage.getItem('donationTypes');
+                const currentDonationTypes = saved ? JSON.parse(saved) : [];
+                const lastKnownTypes = window.lastKnownDonationTypes || [];
+                
+                if (JSON.stringify(currentDonationTypes) !== JSON.stringify(lastKnownTypes)) {
+                    window.lastKnownDonationTypes = currentDonationTypes;
+                    updateUIForDataType();
+                }
+            } catch (error) {
+                console.error('Error checking donation types changes:', error);
             }
         }
     }, 3000); // 3초마다 확인

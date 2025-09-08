@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializePage() {
     loadMemberSelect();
+    loadDonationTypeFilters();
     setDefaultPeriod();
     setupEventListeners();
 }
@@ -92,6 +93,39 @@ function setDefaultPeriod() {
 function setupEventListeners() {
     // Period type change handler
     document.getElementById('periodType').addEventListener('change', handlePeriodChange);
+    
+    // Member selection change
+    document.getElementById('memberSelect').addEventListener('change', loadMemberDonations);
+    
+    // Date change handlers
+    document.getElementById('startDate').addEventListener('change', loadMemberDonations);
+    document.getElementById('endDate').addEventListener('change', loadMemberDonations);
+    
+    // Filter type change
+    document.getElementById('filterType').addEventListener('change', loadMemberDonations);
+    
+    // Button handlers
+    document.getElementById('applyFiltersBtn').addEventListener('click', loadMemberDonations);
+    document.getElementById('resetFiltersBtn').addEventListener('click', resetFilters);
+    document.getElementById('selectAll').addEventListener('change', toggleSelectAll);
+    document.getElementById('exportExcel').addEventListener('click', exportToExcel);
+    document.getElementById('exportPDF').addEventListener('click', exportToPDF);
+    
+    // 헌금 유형 변경 감지 (3초마다)
+    setInterval(() => {
+        try {
+            const saved = localStorage.getItem('donationTypes');
+            const currentDonationTypes = saved ? JSON.parse(saved) : [];
+            const lastKnownTypes = window.lastKnownDonationTypes || [];
+            
+            if (JSON.stringify(currentDonationTypes) !== JSON.stringify(lastKnownTypes)) {
+                window.lastKnownDonationTypes = currentDonationTypes;
+                loadDonationTypeFilters();
+            }
+        } catch (error) {
+            console.error('Error checking donation types changes:', error);
+        }
+    }, 3000);
 }
 
 function handlePeriodChange() {
@@ -266,6 +300,173 @@ function displayDonationsTable() {
     document.getElementById('tableSummary').style.display = 'block';
     
     updateSelectedCount();
+}
+
+// 헌금 유형 필터 로드
+function loadDonationTypeFilters() {
+    const typeFilter = document.getElementById('typeFilter');
+    if (!typeFilter) return;
+    
+    try {
+        // localStorage에서 직접 헌금 유형 읽기
+        let donationTypes = [];
+        try {
+            const saved = localStorage.getItem('donationTypes');
+            donationTypes = saved ? JSON.parse(saved) : ['십일조', '감사헌금', '특별헌금', '선교헌금', '건축헌금', '절기헌금', '기타'];
+        } catch (error) {
+            console.error('Error getting donation types:', error);
+            donationTypes = ['십일조', '감사헌금', '특별헌금', '선교헌금', '건축헌금', '절기헌금', '기타'];
+        }
+        
+        // 현재 선택된 값 저장
+        const currentValue = typeFilter.value;
+        
+        // 전체 옵션 제외하고 모든 옵션 제거
+        const allOption = typeFilter.querySelector('option[value=""]');
+        typeFilter.innerHTML = '';
+        if (allOption) {
+            typeFilter.appendChild(allOption);
+        } else {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = '전체 유형';
+            typeFilter.appendChild(option);
+        }
+        
+        // 헌금 유형 목록 추가
+        donationTypes.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type;
+            option.textContent = type;
+            typeFilter.appendChild(option);
+        });
+        
+        // 이전 선택값 복원
+        if (currentValue && donationTypes.includes(currentValue)) {
+            typeFilter.value = currentValue;
+        }
+    } catch (error) {
+        console.error('Error loading donation type filters:', error);
+    }
+}
+
+// 성도의 헌금 내역 로드
+function loadMemberDonations() {
+    const memberSelect = document.getElementById('memberSelect');
+    const selectedMemberId = memberSelect.value;
+    
+    if (!selectedMemberId) {
+        showNoData('성도를 선택하여 헌금 내역을 조회하세요.');
+        document.getElementById('memberInfo').style.display = 'none';
+        return;
+    }
+    
+    if (!dataService) {
+        showNoData('데이터 서비스가 초기화되지 않았습니다.');
+        return;
+    }
+    
+    // 선택된 성도 정보 표시
+    const selectedOption = memberSelect.options[memberSelect.selectedIndex];
+    document.getElementById('selectedMemberName').textContent = selectedOption.text.split(' (')[0];
+    document.getElementById('memberInfo').style.display = 'block';
+    
+    // 해당 성도의 헌금 내역 가져오기
+    const allDonations = dataService.getDonations();
+    const memberDonations = allDonations.filter(d => d.memberId == selectedMemberId);
+    
+    // 기간 필터 적용
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const typeFilter = document.getElementById('filterType').value;
+    
+    const filteredDonations = memberDonations.filter(donation => {
+        const donationDate = new Date(donation.date);
+        const start = startDate ? new Date(startDate) : new Date('1900-01-01');
+        const end = endDate ? new Date(endDate) : new Date('2100-12-31');
+        
+        const dateMatch = donationDate >= start && donationDate <= end;
+        const typeMatch = !typeFilter || donation.type === typeFilter;
+        
+        return dateMatch && typeMatch;
+    });
+    
+    displayDonations(filteredDonations);
+}
+
+// 헌금 내역 표시
+function displayDonations(donations) {
+    const container = document.getElementById('donationsTable');
+    
+    if (donations.length === 0) {
+        showNoData('조회된 헌금 내역이 없습니다.');
+        return;
+    }
+    
+    // 날짜순 정렬 (최신 순)
+    const sortedDonations = [...donations].sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    const tableHTML = `
+        <table class="donations-table">
+            <thead>
+                <tr>
+                    <th class="select-col">
+                        <label class="checkbox-wrapper">
+                            <input type="checkbox" style="display: none;">
+                            <span class="checkmark"></span>
+                        </label>
+                    </th>
+                    <th class="date-col">헌금일</th>
+                    <th class="type-col">헌금유형</th>
+                    <th class="amount-col">헌금액</th>
+                    <th class="memo-col">메모</th>
+                    <th class="recorded-col">등록일</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${sortedDonations.map(donation => `
+                    <tr data-donation-id="${donation.id}">
+                        <td class="select-col">
+                            <label class="checkbox-wrapper">
+                                <input type="checkbox" class="donation-checkbox" value="${donation.id}">
+                                <span class="checkmark"></span>
+                            </label>
+                        </td>
+                        <td class="date-col">${new Date(donation.date).toLocaleDateString('ko-KR')}</td>
+                        <td class="type-col">${donation.type}</td>
+                        <td class="amount-col">${donation.amount.toLocaleString()}원</td>
+                        <td class="memo-col">${donation.memo || '-'}</td>
+                        <td class="recorded-col">${new Date(donation.recordedAt).toLocaleDateString('ko-KR')}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+    
+    container.innerHTML = tableHTML;
+    
+    // 체크박스 이벤트 리스너 추가
+    container.querySelectorAll('.donation-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', handleDonationSelection);
+    });
+    
+    // 총액 계산 및 표시
+    const totalAmount = sortedDonations.reduce((sum, donation) => sum + donation.amount, 0);
+    document.getElementById('totalAmount').textContent = totalAmount.toLocaleString();
+    document.getElementById('tableSummary').style.display = 'block';
+    
+    updateSelectedCount();
+}
+
+// 필터 리셋
+function resetFilters() {
+    document.getElementById('memberSelect').value = '';
+    document.getElementById('filterType').value = '';
+    document.getElementById('periodType').value = 'thisYear';
+    handlePeriodChange();
+    showNoData('성도를 선택하여 헌금 내역을 조회하세요.');
+    document.getElementById('memberInfo').style.display = 'none';
+    resetSelection();
 }
 
 function showNoData(message) {
