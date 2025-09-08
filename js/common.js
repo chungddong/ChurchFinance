@@ -4,7 +4,26 @@ const path = require('path');
 // 데이터 관리 서비스
 class DataService {
     constructor() {
-        this.dataDir = __dirname;
+        // Electron 빌드 환경에서 사용자 데이터 디렉토리 사용
+        if (typeof global !== 'undefined' && global.userDataPath) {
+            this.dataDir = global.userDataPath;
+        } else if (typeof require === 'function') {
+            // 개발 환경에서는 현재 디렉토리 사용
+            try {
+                const { remote, app } = require('electron');
+                const electronApp = remote ? remote.app : app;
+                if (electronApp) {
+                    this.dataDir = path.join(electronApp.getPath('userData'), 'data');
+                } else {
+                    this.dataDir = __dirname;
+                }
+            } catch (e) {
+                this.dataDir = __dirname;
+            }
+        } else {
+            this.dataDir = __dirname;
+        }
+        
         this.membersFile = path.join(this.dataDir, 'members.json');
         this.donationsFile = path.join(this.dataDir, 'donations.json');
         this.expensesFile = path.join(this.dataDir, 'expenses.json');
@@ -36,10 +55,15 @@ class DataService {
     // 성도 데이터 저장
     saveMembers() {
         try {
+            // 디렉토리가 없으면 생성
+            if (!fs.existsSync(this.dataDir)) {
+                fs.mkdirSync(this.dataDir, { recursive: true });
+            }
             fs.writeFileSync(this.membersFile, JSON.stringify(this.members, null, 2), 'utf8');
             return true;
         } catch (error) {
             console.error('데이터 저장 오류:', error);
+            // 에러가 발생해도 메모리에는 데이터가 유지되므로 false 반환하지만 작업은 계속
             return false;
         }
     }
@@ -53,7 +77,9 @@ class DataService {
         };
         
         this.members.push(newMember);
-        return this.saveMembers() ? newMember : null;
+        // 저장 실패해도 메모리에는 데이터가 추가되었으므로 newMember 반환
+        this.saveMembers();
+        return newMember;
     }
 
     // 성도 수정
@@ -112,6 +138,10 @@ class DataService {
     // 헌금 데이터 저장
     saveDonations() {
         try {
+            // 디렉토리가 없으면 생성
+            if (!fs.existsSync(this.dataDir)) {
+                fs.mkdirSync(this.dataDir, { recursive: true });
+            }
             fs.writeFileSync(this.donationsFile, JSON.stringify(this.donations, null, 2), 'utf8');
             return true;
         } catch (error) {
@@ -129,7 +159,9 @@ class DataService {
         };
         
         this.donations.push(newDonation);
-        return this.saveDonations() ? newDonation : null;
+        // 저장 실패해도 메모리에는 데이터가 추가되었으므로 newDonation 반환
+        this.saveDonations();
+        return newDonation;
     }
 
     // 헌금 수정
@@ -208,6 +240,10 @@ class DataService {
     // 지출 데이터 저장
     saveExpenses() {
         try {
+            // 디렉토리가 없으면 생성
+            if (!fs.existsSync(this.dataDir)) {
+                fs.mkdirSync(this.dataDir, { recursive: true });
+            }
             fs.writeFileSync(this.expensesFile, JSON.stringify(this.expenses, null, 2), 'utf8');
             return true;
         } catch (error) {
@@ -225,7 +261,9 @@ class DataService {
         };
         
         this.expenses.push(newExpense);
-        return this.saveExpenses() ? newExpense : null;
+        // 저장 실패해도 메모리에는 데이터가 추가되었으므로 newExpense 반환
+        this.saveExpenses();
+        return newExpense;
     }
 
     // 지출 목록 반환

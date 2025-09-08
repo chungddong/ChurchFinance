@@ -161,39 +161,6 @@ function handlePeriodChange() {
     }
 }
 
-function loadMemberDonations() {
-    const memberId = document.getElementById('memberSelect').value;
-    console.log('Selected member ID:', memberId);
-    
-    if (!memberId) {
-        showNoData('성도를 선택하여 헌금 내역을 조회하세요.');
-        document.getElementById('memberInfo').style.display = 'none';
-        return;
-    }
-    
-    const member = dataService.getMemberById(memberId);
-    console.log('Found member:', member);
-    if (!member) {
-        showNoData('선택된 성도 정보를 찾을 수 없습니다.');
-        return;
-    }
-    
-    // Show member info
-    document.getElementById('selectedMemberName').textContent = member.name;
-    document.getElementById('memberInfo').style.display = 'block';
-    
-    // Get member's donations
-    currentMemberDonations = dataService.getDonationsByMember(memberId);
-    console.log('Member donations found:', currentMemberDonations);
-    
-    if (currentMemberDonations.length === 0) {
-        showNoData(`${member.name}님의 헌금 내역이 없습니다.`);
-        return;
-    }
-    
-    // Apply filters and display
-    applyFilters();
-}
 
 function applyFilters() {
     const memberId = document.getElementById('memberSelect').value;
@@ -277,7 +244,7 @@ function displayDonationsTable() {
                         <tr data-donation-id="${donation.id}">
                             <td>
                                 <label class="checkbox-wrapper">
-                                    <input type="checkbox" class="donation-checkbox" data-donation-id="${donation.id}" onchange="handleDonationSelection()">
+                                    <input type="checkbox" class="donation-checkbox" data-donation-id="${donation.id}">
                                     <span class="checkmark"></span>
                                 </label>
                             </td>
@@ -299,12 +266,40 @@ function displayDonationsTable() {
     document.getElementById('totalAmount').textContent = totalAmount.toLocaleString();
     document.getElementById('tableSummary').style.display = 'block';
     
+    // Add event listeners to checkboxes
+    setupCheckboxEventListeners();
+    
     updateSelectedCount();
+}
+
+// 체크박스 이벤트 리스너 설정
+function setupCheckboxEventListeners() {
+    console.log('Setting up checkbox event listeners');
+    
+    // 개별 체크박스 이벤트
+    const checkboxes = document.querySelectorAll('.donation-checkbox');
+    console.log('Found checkboxes:', checkboxes.length);
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            console.log('Checkbox changed:', this.dataset.donationId, 'checked:', this.checked);
+            handleDonationSelection();
+        });
+    });
+    
+    // 전체 선택 체크박스 이벤트
+    const selectAllCheckbox = document.getElementById('selectAll');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            console.log('Select all changed:', this.checked);
+            toggleSelectAll();
+        });
+    }
 }
 
 // 헌금 유형 필터 로드
 function loadDonationTypeFilters() {
-    const typeFilter = document.getElementById('typeFilter');
+    const typeFilter = document.getElementById('filterType');
     if (!typeFilter) return;
     
     try {
@@ -350,112 +345,38 @@ function loadDonationTypeFilters() {
     }
 }
 
-// 성도의 헌금 내역 로드
 function loadMemberDonations() {
-    const memberSelect = document.getElementById('memberSelect');
-    const selectedMemberId = memberSelect.value;
+    const memberId = document.getElementById('memberSelect').value;
+    console.log('Selected member ID:', memberId);
     
-    if (!selectedMemberId) {
+    if (!memberId) {
         showNoData('성도를 선택하여 헌금 내역을 조회하세요.');
         document.getElementById('memberInfo').style.display = 'none';
         return;
     }
     
-    if (!dataService) {
-        showNoData('데이터 서비스가 초기화되지 않았습니다.');
+    const member = dataService.getMemberById(memberId);
+    console.log('Found member:', member);
+    if (!member) {
+        showNoData('선택된 성도 정보를 찾을 수 없습니다.');
         return;
     }
     
-    // 선택된 성도 정보 표시
-    const selectedOption = memberSelect.options[memberSelect.selectedIndex];
-    document.getElementById('selectedMemberName').textContent = selectedOption.text.split(' (')[0];
+    // Show member info
+    document.getElementById('selectedMemberName').textContent = member.name;
     document.getElementById('memberInfo').style.display = 'block';
     
-    // 해당 성도의 헌금 내역 가져오기
-    const allDonations = dataService.getDonations();
-    const memberDonations = allDonations.filter(d => d.memberId == selectedMemberId);
+    // Get member's donations
+    currentMemberDonations = dataService.getDonationsByMember(memberId);
+    console.log('Member donations found:', currentMemberDonations);
     
-    // 기간 필터 적용
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-    const typeFilter = document.getElementById('filterType').value;
-    
-    const filteredDonations = memberDonations.filter(donation => {
-        const donationDate = new Date(donation.date);
-        const start = startDate ? new Date(startDate) : new Date('1900-01-01');
-        const end = endDate ? new Date(endDate) : new Date('2100-12-31');
-        
-        const dateMatch = donationDate >= start && donationDate <= end;
-        const typeMatch = !typeFilter || donation.type === typeFilter;
-        
-        return dateMatch && typeMatch;
-    });
-    
-    displayDonations(filteredDonations);
-}
-
-// 헌금 내역 표시
-function displayDonations(donations) {
-    const container = document.getElementById('donationsTable');
-    
-    if (donations.length === 0) {
-        showNoData('조회된 헌금 내역이 없습니다.');
+    if (currentMemberDonations.length === 0) {
+        showNoData(`${member.name}님의 헌금 내역이 없습니다.`);
         return;
     }
     
-    // 날짜순 정렬 (최신 순)
-    const sortedDonations = [...donations].sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    const tableHTML = `
-        <table class="donations-table">
-            <thead>
-                <tr>
-                    <th class="select-col">
-                        <label class="checkbox-wrapper">
-                            <input type="checkbox" style="display: none;">
-                            <span class="checkmark"></span>
-                        </label>
-                    </th>
-                    <th class="date-col">헌금일</th>
-                    <th class="type-col">헌금유형</th>
-                    <th class="amount-col">헌금액</th>
-                    <th class="memo-col">메모</th>
-                    <th class="recorded-col">등록일</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${sortedDonations.map(donation => `
-                    <tr data-donation-id="${donation.id}">
-                        <td class="select-col">
-                            <label class="checkbox-wrapper">
-                                <input type="checkbox" class="donation-checkbox" value="${donation.id}">
-                                <span class="checkmark"></span>
-                            </label>
-                        </td>
-                        <td class="date-col">${new Date(donation.date).toLocaleDateString('ko-KR')}</td>
-                        <td class="type-col">${donation.type}</td>
-                        <td class="amount-col">${donation.amount.toLocaleString()}원</td>
-                        <td class="memo-col">${donation.memo || '-'}</td>
-                        <td class="recorded-col">${new Date(donation.recordedAt).toLocaleDateString('ko-KR')}</td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
-    
-    container.innerHTML = tableHTML;
-    
-    // 체크박스 이벤트 리스너 추가
-    container.querySelectorAll('.donation-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', handleDonationSelection);
-    });
-    
-    // 총액 계산 및 표시
-    const totalAmount = sortedDonations.reduce((sum, donation) => sum + donation.amount, 0);
-    document.getElementById('totalAmount').textContent = totalAmount.toLocaleString();
-    document.getElementById('tableSummary').style.display = 'block';
-    
-    updateSelectedCount();
+    // Apply filters and display
+    applyFilters();
 }
 
 // 필터 리셋
@@ -514,13 +435,17 @@ function handleDonationSelection() {
     console.log('Found checkboxes:', donationCheckboxes.length);
     
     donationCheckboxes.forEach(checkbox => {
-        console.log('Checkbox:', checkbox.dataset.donationId, 'checked:', checkbox.checked);
+        console.log('Checkbox dataset:', checkbox.dataset);
+        console.log('Checkbox donationId:', checkbox.dataset.donationId, 'checked:', checkbox.checked);
         if (checkbox.checked) {
-            selectedDonations.add(checkbox.dataset.donationId);
+            const donationId = checkbox.dataset.donationId;
+            console.log('Adding to selectedDonations:', donationId, 'type:', typeof donationId);
+            selectedDonations.add(donationId);
         }
     });
     
     console.log('Selected donations after update:', selectedDonations);
+    console.log('Selected donations Array:', Array.from(selectedDonations));
     
     // Update select all checkbox
     const selectAllCheckbox = document.getElementById('selectAll');
@@ -569,8 +494,8 @@ function updateSelectedCount() {
 
 function updateExportButtons() {
     const hasSelection = selectedDonations.size > 0;
-    document.getElementById('excelBtn').disabled = !hasSelection;
-    document.getElementById('pdfBtn').disabled = !hasSelection;
+    document.getElementById('exportExcel').disabled = !hasSelection;
+    document.getElementById('exportPDF').disabled = !hasSelection;
 }
 
 function resetFilters() {
@@ -602,15 +527,27 @@ function exportToExcel() {
     const member = dataService.getMemberById(memberId);
     
     console.log('Excel export - Selected donations Set:', selectedDonations);
+    console.log('Excel export - Selected donations Array:', Array.from(selectedDonations));
     console.log('Excel export - Filtered donations:', filteredDonations);
     
     const selectedData = filteredDonations.filter(donation => {
-        const hasId = selectedDonations.has(donation.id.toString());
-        console.log('Checking donation ID:', donation.id, 'Type:', typeof donation.id, 'Has in set:', hasId);
+        // data-donation-id는 문자열로 저장되므로 donation.id를 문자열로 변환하여 비교
+        const donationIdStr = donation.id.toString();
+        const hasId = selectedDonations.has(donationIdStr);
+        console.log('Excel - Checking donation ID:', donation.id, 'Type:', typeof donation.id, 'String:', donationIdStr, 'Has in set:', hasId);
+        console.log('Excel - selectedDonations contents:', Array.from(selectedDonations));
         return hasId;
     });
     
+    console.log('Excel export - Selected data count:', selectedData.length);
     console.log('Excel export - Selected data:', selectedData);
+    
+    // 선택된 데이터가 없으면 경고
+    if (selectedData.length === 0) {
+        console.error('No selected data found for Excel export!');
+        showToast('선택된 데이터를 찾을 수 없습니다. 다시 선택해 주세요.', 'error');
+        return;
+    }
     
     // Get church info
     const churchInfo = getChurchInfo();
@@ -673,18 +610,31 @@ function exportToPDF() {
     const member = dataService.getMemberById(memberId);
     
     console.log('PDF export - Selected donations Set:', selectedDonations);
+    console.log('PDF export - Selected donations Array:', Array.from(selectedDonations));
     console.log('PDF export - Filtered donations:', filteredDonations);
     
     const selectedData = filteredDonations.filter(donation => {
-        const hasId = selectedDonations.has(donation.id.toString());
-        console.log('PDF - Checking donation ID:', donation.id, 'Type:', typeof donation.id, 'Has in set:', hasId);
+        // data-donation-id는 문자열로 저장되므로 donation.id를 문자열로 변환하여 비교
+        const donationIdStr = donation.id.toString();
+        const hasId = selectedDonations.has(donationIdStr);
+        console.log('PDF - Checking donation ID:', donation.id, 'Type:', typeof donation.id, 'String:', donationIdStr, 'Has in set:', hasId);
+        console.log('PDF - selectedDonations contents:', Array.from(selectedDonations));
         return hasId;
     });
     
+    console.log('PDF export - Selected data count:', selectedData.length);
     console.log('PDF export - Selected data:', selectedData);
+    
+    // 선택된 데이터가 없으면 경고
+    if (selectedData.length === 0) {
+        console.error('No selected data found for PDF export!');
+        showToast('선택된 데이터를 찾을 수 없습니다. 다시 선택해 주세요.', 'error');
+        return;
+    }
     
     // Create PDF content
     const totalAmount = selectedData.reduce((sum, d) => sum + d.amount, 0);
+    console.log('PDF export - Total amount:', totalAmount);
     const issueDate = new Date().toLocaleDateString('ko-KR');
     
     const printContent = `
