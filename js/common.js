@@ -470,6 +470,34 @@ function validatePhone(phone) {
     return phoneRegex.test(phone);
 }
 
+// 교회 정보 가져오기
+function getChurchInfo() {
+    try {
+        const saved = localStorage.getItem('churchInfo');
+        return saved ? JSON.parse(saved) : { name: '00교회' };
+    } catch (error) {
+        console.error('Error getting church info:', error);
+        return { name: '00교회' };
+    }
+}
+
+// 헌금 유형 가져오기  
+function getDonationTypes() {
+    try {
+        const saved = localStorage.getItem('donationTypes');
+        return saved ? JSON.parse(saved) : ['십일조', '감사헌금', '특별헌금', '선교헌금', '건축헌금', '절기헌금', '기타'];
+    } catch (error) {
+        console.error('Error getting donation types:', error);
+        return ['십일조', '감사헌금', '특별헌금', '선교헌금', '건축헌금', '절기헌금', '기타'];
+    }
+}
+
+// 전역으로 함수 노출
+if (typeof window !== 'undefined') {
+    window.getChurchInfo = getChurchInfo;
+    window.getDonationTypes = getDonationTypes;
+}
+
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', function() {
     updateCurrentDate();

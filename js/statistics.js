@@ -307,6 +307,10 @@ function exportToExcel() {
         // 날짜순 정렬 (빠른날이 먼저)
         const sortedDonations = [...filteredDonations].sort((a, b) => new Date(a.date) - new Date(b.date));
         
+        // Get church info
+        const churchInfo = getChurchInfo();
+        const churchName = churchInfo ? churchInfo.name : '00교회';
+        
         // Excel 데이터 생성
         const worksheetData = [
             // 헤더
@@ -324,7 +328,12 @@ function exportToExcel() {
                     donation.memo || '',
                     new Date(donation.recordedAt).toLocaleString('ko-KR')
                 ];
-            })
+            }),
+            // Footer
+            [''],
+            ['────────────────────────────────────'],
+            [`${churchName} 재정관리시스템`],
+            [`발급일자: ${new Date().toLocaleDateString('ko-KR')}`]
         ];
         
         // Excel 워크시트 생성
@@ -521,7 +530,7 @@ function generatePDFContent() {
                 
                 .footer {
                     margin-top: 30px;
-                    text-align: right;
+                    text-align: center;
                     font-size: 11px;
                     color: #666;
                     border-top: 1px solid #ccc;
@@ -544,7 +553,6 @@ function generatePDFContent() {
         <body>
             <div class="header">
                 <h1>헌금 통계 보고서</h1>
-                <div class="header-info">출력일: ${dateString} ${timeString}</div>
                 <div class="header-info">조회 기간: ${periodInfo}</div>
             </div>
             
@@ -584,8 +592,9 @@ function generatePDFContent() {
             </table>
             
             <div class="footer">
-                <div>교회 재정관리 시스템</div>
-                <div>Church Finance Management System</div>
+                <div>────────────────────────────────────</div>
+                <div>${getChurchInfo().name} 재정관리시스템</div>
+                <div>발급일자: ${new Date().toLocaleDateString('ko-KR')}</div>
             </div>
         </body>
         </html>
@@ -642,3 +651,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 3000); // 3초마다 확인
 });
+
+// Helper functions to get settings
+function getChurchInfo() {
+    try {
+        if (window.parent && window.parent.getChurchInfo) {
+            return window.parent.getChurchInfo();
+        } else if (window.getChurchInfo) {
+            return window.getChurchInfo();
+        } else {
+            const saved = localStorage.getItem('churchInfo');
+            return saved ? JSON.parse(saved) : { name: '00교회' };
+        }
+    } catch (error) {
+        console.error('Error getting church info:', error);
+        return { name: '00교회' };
+    }
+}

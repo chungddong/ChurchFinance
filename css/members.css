@@ -1,7 +1,7 @@
 /* Member Management Styles */
 .member-management {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
+    display: flex;
+    flex-direction: column;
     gap: 30px;
     height: 100%;
 }
@@ -122,7 +122,7 @@
 }
 
 .member-list {
-    max-height: 400px;
+    max-height: 500px;
     overflow-y: auto;
     overflow-x: hidden;
     background: white;
@@ -257,7 +257,6 @@
 /* Responsive Design */
 @media (max-width: 1200px) {
     .member-management {
-        grid-template-columns: 1fr 1.5fr;
         gap: 20px;
     }
     
@@ -268,16 +267,7 @@
 
 @media (max-width: 900px) {
     .member-management {
-        grid-template-columns: 1fr;
         gap: 20px;
-    }
-    
-    .member-form-section {
-        order: 2;
-    }
-    
-    .member-list-section {
-        order: 1;
     }
     
     .member-table th:nth-child(3) { width: 20%; } /* 주소 줄임 */

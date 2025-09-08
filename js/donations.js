@@ -120,10 +120,19 @@ function getFilteredDonations() {
     const typeFilter = document.getElementById('filterType').value;
     const memberFilter = document.getElementById('filterMember').value;
     
+    // 최근 일주일 날짜 계산
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    
     return donations.filter(donation => {
         const typeMatch = !typeFilter || donation.type === typeFilter;
         const memberMatch = !memberFilter || donation.memberId == memberFilter;
-        return typeMatch && memberMatch;
+        
+        // 최근 일주일 내 기록만 표시
+        const donationDate = new Date(donation.date);
+        const dateMatch = donationDate >= oneWeekAgo;
+        
+        return typeMatch && memberMatch && dateMatch;
     });
 }
 

@@ -422,7 +422,6 @@ function exportToExcel() {
         [`발급대상: ${member.name}님`],
         [`연락처: ${member.phone || '-'}`],
         [`주소: ${member.address || '-'}`],
-        [`발급일자: ${new Date().toLocaleDateString('ko-KR')}`],
         [''],
         ['날짜', '헌금유형', '헌금액', '메모'],
         ...selectedData.map(donation => [
@@ -432,7 +431,11 @@ function exportToExcel() {
             donation.memo || ''
         ]),
         [''],
-        ['총액', '', selectedData.reduce((sum, d) => sum + d.amount, 0), '']
+        ['총액', '', selectedData.reduce((sum, d) => sum + d.amount, 0), ''],
+        [''],
+        ['─────────────────────────────────────'],
+        [`${churchName} 재정관리시스템`],
+        [`발급일자: ${new Date().toLocaleDateString('ko-KR')}`]
     ];
     
     // Create workbook
@@ -567,9 +570,8 @@ function exportToPDF() {
         <body>
             <div class="receipt-container">
                 <div class="receipt-header">
-                    <h1 class="church-name">${getChurchInfo() ? getChurchInfo().name : '00교회'}</h1>
+                    <h1 class="church-name">${getChurchInfo().name}</h1>
                     <h2 class="receipt-title">기부금 영수증</h2>
-                    <div class="receipt-info">발급일자: ${issueDate}</div>
                 </div>
                 
                 <div class="member-section">
@@ -605,8 +607,9 @@ function exportToPDF() {
                 </table>
                 
                 <div class="footer">
-                    <div>${getChurchInfo() ? getChurchInfo().name : '00교회'} 재정관리 시스템</div>
-                    <div>발급일: ${new Date().toLocaleString('ko-KR')}</div>
+                    <div>────────────────────────────────────</div>
+                    <div>${getChurchInfo().name} 재정관리시스템</div>
+                    <div>발급일자: ${new Date().toLocaleDateString('ko-KR')}</div>
                 </div>
             </div>
         </body>
