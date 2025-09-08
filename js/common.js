@@ -7,10 +7,13 @@ class DataService {
         this.dataDir = __dirname;
         this.membersFile = path.join(this.dataDir, 'members.json');
         this.donationsFile = path.join(this.dataDir, 'donations.json');
+        this.expensesFile = path.join(this.dataDir, 'expenses.json');
         this.members = [];
         this.donations = [];
+        this.expenses = [];
         this.loadMembers();
         this.loadDonations();
+        this.loadExpenses();
     }
 
     // 성도 데이터 로드
@@ -183,6 +186,79 @@ class DataService {
                    donationDate >= start && 
                    donationDate <= end;
         });
+    }
+
+    // 지출 데이터 로드
+    loadExpenses() {
+        try {
+            if (fs.existsSync(this.expensesFile)) {
+                const data = fs.readFileSync(this.expensesFile, 'utf8');
+                this.expenses = JSON.parse(data);
+            } else {
+                this.expenses = [];
+            }
+            return this.expenses;
+        } catch (error) {
+            console.error('지출 데이터 로드 오류:', error);
+            this.expenses = [];
+            return this.expenses;
+        }
+    }
+
+    // 지출 데이터 저장
+    saveExpenses() {
+        try {
+            fs.writeFileSync(this.expensesFile, JSON.stringify(this.expenses, null, 2), 'utf8');
+            return true;
+        } catch (error) {
+            console.error('지출 데이터 저장 오류:', error);
+            return false;
+        }
+    }
+
+    // 지출 추가
+    addExpense(expenseData) {
+        const newExpense = {
+            ...expenseData,
+            id: Date.now(),
+            recordedAt: new Date().toISOString()
+        };
+        
+        this.expenses.push(newExpense);
+        return this.saveExpenses() ? newExpense : null;
+    }
+
+    // 지출 목록 반환
+    getExpenses() {
+        return this.expenses;
+    }
+
+    // 지출 수정
+    updateExpense(index, expenseData) {
+        if (index < 0 || index >= this.expenses.length) {
+            return false;
+        }
+
+        const updatedExpense = {
+            ...this.expenses[index],
+            ...expenseData,
+            id: this.expenses[index].id, // ID 유지
+            recordedAt: this.expenses[index].recordedAt, // 등록일 유지
+            updatedAt: new Date().toISOString()
+        };
+
+        this.expenses[index] = updatedExpense;
+        return this.saveExpenses();
+    }
+
+    // 지출 삭제
+    deleteExpense(index) {
+        if (index < 0 || index >= this.expenses.length) {
+            return false;
+        }
+
+        this.expenses.splice(index, 1);
+        return this.saveExpenses();
     }
 }
 
@@ -414,6 +490,9 @@ function loadPage(pageName) {
     switch(pageName) {
         case 'donations':
             content.innerHTML = '<iframe src="pages/donations.html" style="width:100%;height:100%;border:none;"></iframe>';
+            break;
+        case 'expenses':
+            content.innerHTML = '<iframe src="pages/expenses.html" style="width:100%;height:100%;border:none;"></iframe>';
             break;
         case 'statistics':
             content.innerHTML = '<iframe src="pages/statistics.html" style="width:100%;height:100%;border:none;"></iframe>';

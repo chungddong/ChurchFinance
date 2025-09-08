@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>지출 등록</title>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/expenses.css">
+</head>
+<body style="background: #f5f6fa; overflow: auto;">
+    <div class="expense-management">
+        <!-- 지출 등록 폼 -->
+        <div class="expense-form-section">
+            <h3>지출 등록</h3>
+            <form id="expenseForm" class="expense-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expenseCategory">지출 분류 *</label>
+                        <select id="expenseCategory" name="category" required>
+                            <option value="">지출 분류를 선택하세요</option>
+                            <option value="시설관리">시설관리</option>
+                            <option value="전기요금">전기요금</option>
+                            <option value="가스요금">가스요금</option>
+                            <option value="수도요금">수도요금</option>
+                            <option value="전화요금">전화요금</option>
+                            <option value="인터넷요금">인터넷요금</option>
+                            <option value="사무용품">사무용품</option>
+                            <option value="청소용품">청소용품</option>
+                            <option value="예배용품">예배용품</option>
+                            <option value="교육용품">교육용품</option>
+                            <option value="선교비">선교비</option>
+                            <option value="구제비">구제비</option>
+                            <option value="행사비">행사비</option>
+                            <option value="교통비">교통비</option>
+                            <option value="음식비">음식비</option>
+                            <option value="기타">기타</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="expenseAmount">지출액 *</label>
+                        <input type="number" id="expenseAmount" name="amount" required min="100" step="100" placeholder="10000">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expenseDate">지출일 *</label>
+                        <input type="date" id="expenseDate" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="expensePaymentMethod">결제방법</label>
+                        <select id="expensePaymentMethod" name="paymentMethod">
+                            <option value="현금">현금</option>
+                            <option value="계좌이체">계좌이체</option>
+                            <option value="카드결제">카드결제</option>
+                            <option value="기타">기타</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expenseVendor">거래처/상호</label>
+                        <input type="text" id="expenseVendor" name="vendor" placeholder="거래처나 상호명을 입력하세요">
+                    </div>
+                    <div class="form-group">
+                        <label for="expenseApprover">승인자</label>
+                        <input type="text" id="expenseApprover" name="approver" placeholder="승인자 이름을 입력하세요">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expenseDescription">내용/메모</label>
+                        <textarea id="expenseDescription" name="description" rows="3" placeholder="지출 내용이나 메모사항을 입력하세요"></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">등록</button>
+                    <button type="reset" class="btn-secondary">취소</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 지출 목록 -->
+        <div class="expense-list-section">
+            <div class="section-header">
+                <h3>지출 기록 목록 <small>(최근 1주일)</small></h3>
+                <div class="header-actions">
+                    <div class="filter-group">
+                        <select id="filterCategory">
+                            <option value="">전체 분류</option>
+                            <option value="시설관리">시설관리</option>
+                            <option value="전기요금">전기요금</option>
+                            <option value="가스요금">가스요금</option>
+                            <option value="수도요금">수도요금</option>
+                            <option value="전화요금">전화요금</option>
+                            <option value="인터넷요금">인터넷요금</option>
+                            <option value="사무용품">사무용품</option>
+                            <option value="청소용품">청소용품</option>
+                            <option value="예배용품">예배용품</option>
+                            <option value="교육용품">교육용품</option>
+                            <option value="선교비">선교비</option>
+                            <option value="구제비">구제비</option>
+                            <option value="행사비">행사비</option>
+                            <option value="교통비">교통비</option>
+                            <option value="음식비">음식비</option>
+                            <option value="기타">기타</option>
+                        </select>
+                        <select id="filterPaymentMethod">
+                            <option value="">전체 결제방법</option>
+                            <option value="현금">현금</option>
+                            <option value="계좌이체">계좌이체</option>
+                            <option value="카드결제">카드결제</option>
+                            <option value="기타">기타</option>
+                        </select>
+                    </div>
+                    <div class="expense-summary">
+                        총 <span id="expenseCount">0</span>건 | 
+                        합계: <span id="expenseTotal">0</span>원
+                    </div>
+                </div>
+            </div>
+            <div class="expense-list" id="expenseList">
+                <div class="no-expenses">
+                    등록된 지출 기록이 없습니다.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 지출 정보 편집 다이얼로그 -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">지출 정보 수정</h3>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            <form id="editExpenseForm" class="expense-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editExpenseCategory">지출 분류 *</label>
+                        <select id="editExpenseCategory" name="category" required>
+                            <option value="시설관리">시설관리</option>
+                            <option value="전기요금">전기요금</option>
+                            <option value="가스요금">가스요금</option>
+                            <option value="수도요금">수도요금</option>
+                            <option value="전화요금">전화요금</option>
+                            <option value="인터넷요금">인터넷요금</option>
+                            <option value="사무용품">사무용품</option>
+                            <option value="청소용품">청소용품</option>
+                            <option value="예배용품">예배용품</option>
+                            <option value="교육용품">교육용품</option>
+                            <option value="선교비">선교비</option>
+                            <option value="구제비">구제비</option>
+                            <option value="행사비">행사비</option>
+                            <option value="교통비">교통비</option>
+                            <option value="음식비">음식비</option>
+                            <option value="기타">기타</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editExpenseAmount">지출액 *</label>
+                        <input type="number" id="editExpenseAmount" name="amount" required min="100" step="100">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editExpenseDate">지출일 *</label>
+                        <input type="date" id="editExpenseDate" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editExpensePaymentMethod">결제방법</label>
+                        <select id="editExpensePaymentMethod" name="paymentMethod">
+                            <option value="현금">현금</option>
+                            <option value="계좌이체">계좌이체</option>
+                            <option value="카드결제">카드결제</option>
+                            <option value="기타">기타</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editExpenseVendor">거래처/상호</label>
+                        <input type="text" id="editExpenseVendor" name="vendor">
+                    </div>
+                    <div class="form-group">
+                        <label for="editExpenseApprover">승인자</label>
+                        <input type="text" id="editExpenseApprover" name="approver">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editExpenseDescription">내용/메모</label>
+                        <textarea id="editExpenseDescription" name="description" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">수정</button>
+                    <button type="button" class="btn-secondary" onclick="closeEditModal()">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/expenses.js"></script>
+</body>
+</html>

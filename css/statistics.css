@@ -23,6 +23,42 @@
     padding-bottom: 15px;
 }
 
+.data-type-toggle {
+    display: flex;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 4px;
+    gap: 2px;
+}
+
+.toggle-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    background: transparent;
+    color: #6c757d;
+}
+
+.toggle-btn:hover {
+    color: #495057;
+    background: #e9ecef;
+}
+
+.toggle-btn.active {
+    background: #3498db;
+    color: white;
+    box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+}
+
+.toggle-btn.active:hover {
+    background: #2980b9;
+    color: white;
+}
+
 .filter-header h3 {
     margin: 0;
     font-size: 22px;
@@ -334,6 +370,39 @@
 .monthly-stat-count {
     font-size: 12px;
     color: #95a5a6;
+}
+
+/* 수입/지출 구분 스타일 */
+.income-amount {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.expense-amount {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.income-type {
+    background: #d4edda;
+    color: #155724;
+    font-weight: 600;
+    border-radius: 4px;
+    padding: 4px 8px;
+    text-align: center;
+}
+
+.expense-type {
+    background: #f8d7da;
+    color: #721c24;
+    font-weight: 600;
+    border-radius: 4px;
+    padding: 4px 8px;
+    text-align: center;
+}
+
+.category-cell {
+    font-weight: 500;
 }
 
 /* 빈 데이터 상태 */

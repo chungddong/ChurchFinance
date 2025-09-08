@@ -11,7 +11,12 @@
         <!-- 필터 영역 -->
         <div class="filter-section">
             <div class="filter-header">
-                <h3>헌금 통계</h3>
+                <h3 id="statisticsTitle">재정 통계</h3>
+                <div class="data-type-toggle">
+                    <button class="toggle-btn active" id="incomeBtn" onclick="setDataType('income')">수입</button>
+                    <button class="toggle-btn" id="expenseBtn" onclick="setDataType('expense')">지출</button>
+                    <button class="toggle-btn" id="combinedBtn" onclick="setDataType('combined')">종합</button>
+                </div>
             </div>
             
             <div class="filter-controls">
@@ -40,7 +45,7 @@
                 
                 <div class="filter-row">
                     <div class="filter-group">
-                        <label>헌금 유형</label>
+                        <label id="filterTypeLabel">헌금 유형</label>
                         <select id="filterType">
                             <option value="">전체 유형</option>
                             <option value="십일조">십일조</option>
@@ -53,7 +58,7 @@
                         </select>
                     </div>
                     
-                    <div class="filter-group">
+                    <div class="filter-group" id="memberFilterGroup">
                         <label>성도 선택</label>
                         <select id="filterMember">
                             <option value="">전체 성도</option>
@@ -75,7 +80,7 @@
         <!-- 상세 통계 표 -->
         <div class="statistics-table-section">
             <div class="table-header">
-                <h4>상세 헌금 내역</h4>
+                <h4 id="tableTitle">상세 헌금 내역</h4>
                 <div class="table-header-right">
                     <div class="export-buttons">
                         <button class="btn-export excel" onclick="exportToExcel()" title="엑셀 다운로드">
@@ -101,7 +106,7 @@
 
         <!-- 유형별 통계 -->
         <div class="type-statistics-section">
-            <h4>헌금 유형별 통계</h4>
+            <h4 id="typeStatsTitle">헌금 유형별 통계</h4>
             <div class="type-stats-container" id="typeStatsContainer">
                 <div class="no-data">
                     조회할 데이터가 없습니다.
@@ -111,7 +116,7 @@
 
         <!-- 월별 통계 (연간 조회 시에만 표시) -->
         <div class="monthly-statistics-section" id="monthlyStatsSection" style="display: none;">
-            <h4>월별 헌금 현황</h4>
+            <h4 id="monthlyStatsTitle">월별 헌금 현황</h4>
             <div class="monthly-stats-container" id="monthlyStatsContainer">
             </div>
         </div>
