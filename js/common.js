@@ -62,9 +62,10 @@ class DataService {
             fs.writeFileSync(this.membersFile, JSON.stringify(this.members, null, 2), 'utf8');
             return true;
         } catch (error) {
-            console.error('데이터 저장 오류:', error);
-            // 에러가 발생해도 메모리에는 데이터가 유지되므로 false 반환하지만 작업은 계속
-            return false;
+            console.error('성도 데이터 저장 오류:', error);
+            console.error('저장 경로:', this.membersFile);
+            console.error('데이터 디렉토리:', this.dataDir);
+            throw error; // 에러를 다시 던져서 상위에서 처리할 수 있도록
         }
     }
 
@@ -97,8 +98,17 @@ class DataService {
     // 성도 삭제
     deleteMember(index) {
         if (index >= 0 && index < this.members.length) {
-            this.members.splice(index, 1);
-            return this.saveMembers();
+            const deletedMember = this.members[index]; // 백업용
+            try {
+                this.members.splice(index, 1);
+                this.saveMembers();
+                return true;
+            } catch (error) {
+                // 저장 실패 시 메모리 상태 복원
+                this.members.splice(index, 0, deletedMember);
+                console.error('성도 삭제 중 저장 오류:', error);
+                throw error;
+            }
         }
         return false;
     }
@@ -146,7 +156,9 @@ class DataService {
             return true;
         } catch (error) {
             console.error('헌금 데이터 저장 오류:', error);
-            return false;
+            console.error('저장 경로:', this.donationsFile);
+            console.error('데이터 디렉토리:', this.dataDir);
+            throw error;
         }
     }
 
@@ -179,8 +191,17 @@ class DataService {
     // 헌금 삭제
     deleteDonation(index) {
         if (index >= 0 && index < this.donations.length) {
-            this.donations.splice(index, 1);
-            return this.saveDonations();
+            const deletedDonation = this.donations[index]; // 백업용
+            try {
+                this.donations.splice(index, 1);
+                this.saveDonations();
+                return true;
+            } catch (error) {
+                // 저장 실패 시 메모리 상태 복원
+                this.donations.splice(index, 0, deletedDonation);
+                console.error('헌금 삭제 중 저장 오류:', error);
+                throw error;
+            }
         }
         return false;
     }
@@ -248,7 +269,9 @@ class DataService {
             return true;
         } catch (error) {
             console.error('지출 데이터 저장 오류:', error);
-            return false;
+            console.error('저장 경로:', this.expensesFile);
+            console.error('데이터 디렉토리:', this.dataDir);
+            throw error;
         }
     }
 
@@ -295,8 +318,17 @@ class DataService {
             return false;
         }
 
-        this.expenses.splice(index, 1);
-        return this.saveExpenses();
+        const deletedExpense = this.expenses[index]; // 백업용
+        try {
+            this.expenses.splice(index, 1);
+            this.saveExpenses();
+            return true;
+        } catch (error) {
+            // 저장 실패 시 메모리 상태 복원
+            this.expenses.splice(index, 0, deletedExpense);
+            console.error('지출 삭제 중 저장 오류:', error);
+            throw error;
+        }
     }
 }
 

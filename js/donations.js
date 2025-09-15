@@ -212,15 +212,13 @@ function deleteDonation(index) {
     if (confirm('정말로 이 헌금 기록을 삭제하시겠습니까?')) {
         try {
             const dataService = parent.window.dataService;
-            if (dataService.deleteDonation(index)) {
-                loadData(); // 데이터 다시 로드
-                showToast('헌금 기록이 삭제되었습니다.', 'success');
-            } else {
-                showToast('헌금 삭제 중 오류가 발생했습니다.', 'error');
-            }
+            dataService.deleteDonation(index);
+            loadData(); // 데이터 다시 로드
+            showToast('헌금 기록이 삭제되었습니다.', 'success');
         } catch (error) {
             console.error('헌금 삭제 오류:', error);
-            showToast('헌금 삭제 중 오류가 발생했습니다.', 'error');
+            loadData(); // 메모리 상태가 복원되었으므로 다시 로드
+            showToast('삭제 중 오류가 발생했습니다. 파일 저장 권한을 확인해주세요.', 'error');
         }
     }
 }
