@@ -38,7 +38,7 @@ function createWindow () {
   mainWindow.setMenuBarVisibility(false)
 
   mainWindow.loadFile('index.html')
-  mainWindow.webContents.openDevTools() // 개발자 도구 활성화
+  //mainWindow.webContents.openDevTools() // 개발자 도구 활성화
 }
 
 app.whenReady().then(() => {

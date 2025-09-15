@@ -33,7 +33,13 @@ function setupEventListeners() {
     if (churchForm) {
         churchForm.addEventListener('submit', saveChurchInfo);
     }
-    
+
+    // Password form submission
+    const passwordForm = document.getElementById('passwordForm');
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', changePassword);
+    }
+
     // Enter key for adding donation type
     const newTypeInput = document.getElementById('newDonationType');
     if (newTypeInput) {
@@ -442,8 +448,72 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
+// 비밀번호 변경 처리
+function changePassword(event) {
+    event.preventDefault();
+
+    const currentPassword = document.getElementById('currentPassword').value.trim();
+    const newPassword = document.getElementById('newPassword').value.trim();
+    const confirmPassword = document.getElementById('confirmPassword').value.trim();
+
+    // 입력 검증
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        showToast('모든 필드를 입력해주세요.', 'error');
+        return;
+    }
+
+    if (newPassword.length < 4) {
+        showToast('새 비밀번호는 최소 4자 이상이어야 합니다.', 'error');
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        showToast('새 비밀번호와 확인 비밀번호가 일치하지 않습니다.', 'error');
+        return;
+    }
+
+    try {
+        // AuthManager 가져오기
+        let authManager;
+        if (window.parent && window.parent.authManager) {
+            authManager = window.parent.authManager;
+        } else if (window.authManager) {
+            authManager = window.authManager;
+        } else {
+            showToast('인증 시스템에 접근할 수 없습니다.', 'error');
+            return;
+        }
+
+        // 현재 비밀번호 검증
+        if (!authManager.verifyPassword(currentPassword)) {
+            showToast('현재 비밀번호가 올바르지 않습니다.', 'error');
+            document.getElementById('currentPassword').focus();
+            return;
+        }
+
+        // 새 비밀번호 설정
+        if (authManager.setPassword(newPassword)) {
+            showToast('비밀번호가 성공적으로 변경되었습니다.', 'success');
+            resetPasswordForm();
+        } else {
+            showToast('비밀번호 변경 중 오류가 발생했습니다.', 'error');
+        }
+
+    } catch (error) {
+        console.error('비밀번호 변경 오류:', error);
+        showToast('비밀번호 변경 중 오류가 발생했습니다.', 'error');
+    }
+}
+
+// 비밀번호 폼 초기화
+function resetPasswordForm() {
+    document.getElementById('passwordForm').reset();
+}
+
 // Make functions available globally for other modules
 if (typeof window !== 'undefined') {
     window.getChurchInfo = getChurchInfo;
     window.getDonationTypes = getDonationTypes;
+    window.changePassword = changePassword;
+    window.resetPasswordForm = resetPasswordForm;
 }

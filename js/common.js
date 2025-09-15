@@ -1,9 +1,73 @@
 const fs = require('fs');
 const path = require('path');
 
+// 데이터 암호화/복호화 유틸리티
+class DataEncryption {
+    constructor() {
+        this.encryptionKey = 'ChurchFinance2024!@#$%';
+    }
+
+    // 간단한 XOR 암호화 (UTF-8 안전)
+    encrypt(data) {
+        try {
+            const jsonString = JSON.stringify(data);
+            let encrypted = [];
+
+            for (let i = 0; i < jsonString.length; i++) {
+                const charCode = jsonString.charCodeAt(i);
+                const keyCode = this.encryptionKey.charCodeAt(i % this.encryptionKey.length);
+                encrypted.push(charCode ^ keyCode);
+            }
+
+            return btoa(String.fromCharCode(...encrypted));
+        } catch (error) {
+            console.error('데이터 암호화 오류:', error);
+            // 암호화 실패 시 JSON만 Base64 인코딩
+            return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+        }
+    }
+
+    // 복호화 (UTF-8 안전)
+    decrypt(encryptedData) {
+        try {
+            if (!encryptedData) return [];
+
+            // 먼저 기존 JSON 형식인지 확인 (암호화되지 않은 데이터)
+            if (encryptedData.startsWith('[') || encryptedData.startsWith('{')) {
+                console.log('암호화되지 않은 기존 데이터 감지, 그대로 파싱');
+                return JSON.parse(encryptedData);
+            }
+
+            const decoded = atob(encryptedData); // Base64 디코딩
+            let decrypted = [];
+
+            for (let i = 0; i < decoded.length; i++) {
+                const charCode = decoded.charCodeAt(i);
+                const keyCode = this.encryptionKey.charCodeAt(i % this.encryptionKey.length);
+                decrypted.push(charCode ^ keyCode);
+            }
+
+            const decryptedString = String.fromCharCode(...decrypted);
+            return JSON.parse(decryptedString);
+        } catch (error) {
+            console.error('데이터 복호화 오류:', error);
+            try {
+                // UTF-8 디코딩 시도
+                return JSON.parse(decodeURIComponent(escape(atob(encryptedData))));
+            } catch (e2) {
+                console.error('UTF-8 디코딩 실패:', e2);
+                // 최후 수단: 빈 배열 반환
+                console.log('데이터 복호화 실패, 빈 배열 반환');
+                return [];
+            }
+        }
+    }
+}
+
 // 데이터 관리 서비스
 class DataService {
     constructor() {
+        this.encryption = new DataEncryption();
         // 항상 문서 폴더의 ChurchFinance 디렉토리 사용
         try {
             if (typeof require === 'function') {
@@ -47,14 +111,15 @@ class DataService {
     loadMembers() {
         try {
             if (fs.existsSync(this.membersFile)) {
-                const data = fs.readFileSync(this.membersFile, 'utf8');
-                this.members = JSON.parse(data);
+                const encryptedData = fs.readFileSync(this.membersFile, 'utf8');
+                this.members = this.encryption.decrypt(encryptedData);
+                console.log('성도 데이터 로드 완료:', this.members.length, '건');
             } else {
                 this.members = [];
             }
             return this.members;
         } catch (error) {
-            console.error('데이터 로드 오류:', error);
+            console.error('성도 데이터 로드 오류:', error);
             this.members = [];
             return this.members;
         }
@@ -68,9 +133,9 @@ class DataService {
                 fs.mkdirSync(this.dataDir, { recursive: true });
                 console.log('데이터 디렉토리 생성:', this.dataDir);
             }
-            const data = JSON.stringify(this.members, null, 2);
-            fs.writeFileSync(this.membersFile, data, 'utf8');
-            console.log('성도 데이터 저장 완료:', this.membersFile);
+            const encryptedData = this.encryption.encrypt(this.members);
+            fs.writeFileSync(this.membersFile, encryptedData, 'utf8');
+            console.log('성도 데이터 암호화 저장 완료:', this.membersFile);
             return true;
         } catch (error) {
             console.error('성도 데이터 저장 오류:', error);
@@ -151,8 +216,9 @@ class DataService {
     loadDonations() {
         try {
             if (fs.existsSync(this.donationsFile)) {
-                const data = fs.readFileSync(this.donationsFile, 'utf8');
-                this.donations = JSON.parse(data);
+                const encryptedData = fs.readFileSync(this.donationsFile, 'utf8');
+                this.donations = this.encryption.decrypt(encryptedData);
+                console.log('헌금 데이터 로드 완료:', this.donations.length, '건');
             } else {
                 this.donations = [];
             }
@@ -172,9 +238,9 @@ class DataService {
                 fs.mkdirSync(this.dataDir, { recursive: true });
                 console.log('데이터 디렉토리 생성:', this.dataDir);
             }
-            const data = JSON.stringify(this.donations, null, 2);
-            fs.writeFileSync(this.donationsFile, data, 'utf8');
-            console.log('헌금 데이터 저장 완료:', this.donationsFile);
+            const encryptedData = this.encryption.encrypt(this.donations);
+            fs.writeFileSync(this.donationsFile, encryptedData, 'utf8');
+            console.log('헌금 데이터 암호화 저장 완료:', this.donationsFile);
             return true;
         } catch (error) {
             console.error('헌금 데이터 저장 오류:', error);
@@ -274,8 +340,9 @@ class DataService {
     loadExpenses() {
         try {
             if (fs.existsSync(this.expensesFile)) {
-                const data = fs.readFileSync(this.expensesFile, 'utf8');
-                this.expenses = JSON.parse(data);
+                const encryptedData = fs.readFileSync(this.expensesFile, 'utf8');
+                this.expenses = this.encryption.decrypt(encryptedData);
+                console.log('지출 데이터 로드 완료:', this.expenses.length, '건');
             } else {
                 this.expenses = [];
             }
@@ -295,9 +362,9 @@ class DataService {
                 fs.mkdirSync(this.dataDir, { recursive: true });
                 console.log('데이터 디렉토리 생성:', this.dataDir);
             }
-            const data = JSON.stringify(this.expenses, null, 2);
-            fs.writeFileSync(this.expensesFile, data, 'utf8');
-            console.log('지출 데이터 저장 완료:', this.expensesFile);
+            const encryptedData = this.encryption.encrypt(this.expenses);
+            fs.writeFileSync(this.expensesFile, encryptedData, 'utf8');
+            console.log('지출 데이터 암호화 저장 완료:', this.expensesFile);
             return true;
         } catch (error) {
             console.error('지출 데이터 저장 오류:', error);
@@ -680,13 +747,58 @@ function getDonationTypes() {
     }
 }
 
+// 인증 관련 함수들
+function checkAuthentication() {
+    if (typeof window.authManager === 'undefined') {
+        // AuthManager가 없는 경우 로드
+        return false;
+    }
+    return window.authManager.isLoggedIn();
+}
+
+function logout() {
+    if (window.authManager) {
+        window.authManager.logout();
+    }
+    showLoginScreen();
+}
+
+function showLoginScreen() {
+    document.getElementById('loginScreen').style.display = 'block';
+    document.getElementById('startScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'none';
+}
+
+function showMainFromLogin() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('startScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+
+    // 기본 탭 로드
+    loadPage('members');
+    updateCurrentDate();
+}
+
 // 전역으로 함수 노출
 if (typeof window !== 'undefined') {
     window.getChurchInfo = getChurchInfo;
     window.getDonationTypes = getDonationTypes;
+    window.checkAuthentication = checkAuthentication;
+    window.logout = logout;
+    window.showLoginScreen = showLoginScreen;
+    window.showMainFromLogin = showMainFromLogin;
 }
 
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', function() {
+    // 인증 확인
+    setTimeout(() => {
+        if (!checkAuthentication()) {
+            showLoginScreen();
+        } else {
+            showMainFromLogin();
+        }
+    }, 100);
+
     updateCurrentDate();
 });

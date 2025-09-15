@@ -6,8 +6,13 @@
     <link rel="stylesheet" href="css/common.css">
 </head>
 <body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <iframe src="pages/login.html" style="width:100%;height:100vh;border:none;"></iframe>
+    </div>
+
     <!-- Start Screen -->
-    <div class="start-screen" id="startScreen">
+    <div class="start-screen" id="startScreen" style="display:none;">
         <div class="logo-container">
             <h1>교회 재정관리</h1>
             <p>Church Finance Management System</p>
@@ -21,6 +26,7 @@
             <h1>교회 재정관리 시스템</h1>
             <div class="user-info">
                 오늘 날짜: <span id="currentDate"></span>
+                <button class="logout-btn" onclick="logout()" title="로그아웃">🚪</button>
             </div>
         </div>
 
@@ -38,6 +44,7 @@
         </div>
     </div>
 
+    <script src="js/login.js"></script>
     <script src="js/init.js"></script>
     <script src="js/common.js"></script>
 </body>

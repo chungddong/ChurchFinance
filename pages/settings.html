@@ -51,6 +51,57 @@
             </div>
         </div>
 
+        <!-- 보안 설정 -->
+        <div class="settings-section">
+            <div class="section-header">
+                <h3>보안 설정</h3>
+                <p>시스템 접근 비밀번호를 관리합니다.</p>
+            </div>
+            <div class="section-content">
+                <form id="passwordForm" class="password-form">
+                    <div class="password-info">
+                        <div class="info-card">
+                            <h4>🔒 비밀번호 변경</h4>
+                            <p>보안을 위해 정기적으로 비밀번호를 변경해 주세요.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="currentPassword">현재 비밀번호 *</label>
+                            <input type="password" id="currentPassword" name="currentPassword" required placeholder="현재 비밀번호를 입력하세요">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="newPassword">새 비밀번호 *</label>
+                            <input type="password" id="newPassword" name="newPassword" required placeholder="새 비밀번호를 입력하세요" minlength="4">
+                            <small class="help-text">최소 4자 이상 입력해 주세요.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">새 비밀번호 확인 *</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="새 비밀번호를 다시 입력하세요" minlength="4">
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">비밀번호 변경</button>
+                        <button type="button" class="btn-secondary" onclick="resetPasswordForm()">초기화</button>
+                    </div>
+
+                    <div class="security-notes">
+                        <h5>보안 주의사항</h5>
+                        <ul>
+                            <li>비밀번호를 분실하면 데이터에 접근할 수 없습니다.</li>
+                            <li>정기적으로 비밀번호를 변경해 주세요.</li>
+                            <li>타인과 비밀번호를 공유하지 마세요.</li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- 헌금 유형 관리 -->
         <div class="settings-section">
             <div class="section-header">

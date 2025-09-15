@@ -1002,10 +1002,13 @@ function generatePDFContent() {
                 
                 .number-col { width: 6%; text-align: center; }
                 .date-col { width: 12%; text-align: center; }
-                .type-col { width: 12%; font-weight: bold; }
+                .type-col { width: 8%; font-weight: bold; }
+                .category-col { width: 18%; font-weight: bold; }
                 .member-col { width: 12%; }
+                .vendor-col { width: 12%; }
                 .amount-col { width: 15%; text-align: right; font-weight: bold; }
-                .memo-col { width: 43%; }
+                .details-col { width: 15%; }
+                .memo-col { width: 20%; }
                 
                 .footer {
                     margin-top: 30px;
