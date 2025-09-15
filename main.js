@@ -13,9 +13,9 @@ function createWindow () {
     }
   })
 
-  // 사용자 데이터 디렉토리 설정
-  const userDataPath = app.getPath('userData');
-  const dataDir = path.join(userDataPath, 'data');
+  // 문서 폴더에 앱 전용 디렉토리 설정
+  const documentsPath = app.getPath('documents');
+  const dataDir = path.join(documentsPath, 'ChurchFinance');
   
   // 데이터 디렉토리가 없으면 생성
   if (!fs.existsSync(dataDir)) {
@@ -34,8 +34,11 @@ function createWindow () {
   // 전역 변수로 데이터 경로 설정
   global.userDataPath = dataDir;
 
+  // 메뉴바 숨기기
+  mainWindow.setMenuBarVisibility(false)
+
   mainWindow.loadFile('index.html')
-  //mainWindow.webContents.openDevTools() // 개발자 도구 열기
+  mainWindow.webContents.openDevTools() // 개발자 도구 활성화
 }
 
 app.whenReady().then(() => {

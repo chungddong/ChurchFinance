@@ -188,21 +188,19 @@ function registerDonation(donationData) {
     try {
         const dataService = parent.window.dataService;
         const newDonation = dataService.addDonation(donationData);
-        
-        if (newDonation) {
-            loadData(); // 데이터 다시 로드
-            showToast('헌금이 성공적으로 등록되었습니다.', 'success');
-            document.getElementById('donationForm').reset();
-            // 오늘 날짜로 기본값 설정
-            document.getElementById('donationDate').value = new Date().toISOString().split('T')[0];
-            return true;
-        } else {
-            showToast('헌금 등록 중 오류가 발생했습니다.', 'error');
-            return false;
-        }
+
+        // 메모리에서 최신 데이터를 가져와서 UI 즉시 갱신
+        donations = dataService.getDonations();
+        displayDonations(); // 즉시 화면 갱신
+
+        showToast('헌금이 성공적으로 등록되었습니다.', 'success');
+        document.getElementById('donationForm').reset();
+        // 오늘 날짜로 기본값 설정
+        document.getElementById('donationDate').value = new Date().toISOString().split('T')[0];
+        return true;
     } catch (error) {
         console.error('헌금 등록 오류:', error);
-        showToast('헌금 등록 중 오류가 발생했습니다.', 'error');
+        showToast('헌금 등록 중 오류가 발생했습니다. 파일 저장 권한을 확인해주세요.', 'error');
         return false;
     }
 }
@@ -213,11 +211,19 @@ function deleteDonation(index) {
         try {
             const dataService = parent.window.dataService;
             dataService.deleteDonation(index);
-            loadData(); // 데이터 다시 로드
+
+            // 메모리에서 최신 데이터를 가져와서 UI 즉시 갱신
+            donations = dataService.getDonations();
+            displayDonations(); // 즉시 화면 갱신
+
             showToast('헌금 기록이 삭제되었습니다.', 'success');
         } catch (error) {
             console.error('헌금 삭제 오류:', error);
-            loadData(); // 메모리 상태가 복원되었으므로 다시 로드
+
+            // 메모리 상태가 복원되었으므로 UI 갱신
+            donations = dataService.getDonations();
+            displayDonations();
+
             showToast('삭제 중 오류가 발생했습니다. 파일 저장 권한을 확인해주세요.', 'error');
         }
     }

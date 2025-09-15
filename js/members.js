@@ -83,19 +83,17 @@ function registerMember(memberData) {
     try {
         const dataService = parent.window.dataService;
         const newMember = dataService.addMember(memberData);
-        
-        if (newMember) {
-            loadMembers(); // 데이터 다시 로드
-            showToast('성도가 성공적으로 등록되었습니다.', 'success');
-            document.getElementById('memberForm').reset();
-            return true;
-        } else {
-            showToast('성도 등록 중 오류가 발생했습니다.', 'error');
-            return false;
-        }
+
+        // 메모리에서 최신 데이터를 가져와서 UI 즉시 갱신
+        members = dataService.getMembers();
+        displayMembers(); // 즉시 화면 갱신
+
+        showToast('성도가 성공적으로 등록되었습니다.', 'success');
+        document.getElementById('memberForm').reset();
+        return true;
     } catch (error) {
         console.error('성도 등록 오류:', error);
-        showToast('성도 등록 중 오류가 발생했습니다.', 'error');
+        showToast('성도 등록 중 오류가 발생했습니다. 파일 저장 권한을 확인해주세요.', 'error');
         return false;
     }
 }
@@ -106,11 +104,19 @@ function deleteMember(index) {
         try {
             const dataService = parent.window.dataService;
             dataService.deleteMember(index);
-            loadMembers(); // 데이터 다시 로드
+
+            // 메모리에서 최신 데이터를 가져와서 UI 즉시 갱신
+            members = dataService.getMembers();
+            displayMembers(); // 즉시 화면 갱신
+
             showToast('성도가 삭제되었습니다.', 'success');
         } catch (error) {
             console.error('성도 삭제 오류:', error);
-            loadMembers(); // 메모리 상태가 복원되었으므로 다시 로드
+
+            // 메모리 상태가 복원되었으므로 UI 갱신
+            members = dataService.getMembers();
+            displayMembers();
+
             showToast('삭제 중 오류가 발생했습니다. 파일 저장 권한을 확인해주세요.', 'error');
         }
     }
@@ -170,21 +176,21 @@ function closeEditModal() {
 // 성도 정보 수정
 function updateMember(memberData) {
     if (editingIndex === -1) return false;
-    
+
     try {
         const dataService = parent.window.dataService;
-        if (dataService.updateMember(editingIndex, memberData)) {
-            loadMembers(); // 데이터 다시 로드
-            showToast('성도 정보가 성공적으로 수정되었습니다.', 'success');
-            closeEditModal();
-            return true;
-        } else {
-            showToast('성도 정보 수정 중 오류가 발생했습니다.', 'error');
-            return false;
-        }
+        dataService.updateMember(editingIndex, memberData);
+
+        // 메모리에서 최신 데이터를 가져와서 UI 즉시 갱신
+        members = dataService.getMembers();
+        displayMembers(); // 즉시 화면 갱신
+
+        showToast('성도 정보가 성공적으로 수정되었습니다.', 'success');
+        closeEditModal();
+        return true;
     } catch (error) {
         console.error('성도 정보 수정 오류:', error);
-        showToast('성도 정보 수정 중 오류가 발생했습니다.', 'error');
+        showToast('성도 정보 수정 중 오류가 발생했습니다. 파일 저장 권한을 확인해주세요.', 'error');
         return false;
     }
 }

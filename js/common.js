@@ -4,24 +4,32 @@ const path = require('path');
 // 데이터 관리 서비스
 class DataService {
     constructor() {
-        // Electron 빌드 환경에서 사용자 데이터 디렉토리 사용
-        if (typeof global !== 'undefined' && global.userDataPath) {
-            this.dataDir = global.userDataPath;
-        } else if (typeof require === 'function') {
-            // 개발 환경에서는 현재 디렉토리 사용
-            try {
+        // 항상 문서 폴더의 ChurchFinance 디렉토리 사용
+        try {
+            if (typeof require === 'function') {
                 const { remote, app } = require('electron');
                 const electronApp = remote ? remote.app : app;
                 if (electronApp) {
-                    this.dataDir = path.join(electronApp.getPath('userData'), 'data');
+                    const documentsPath = electronApp.getPath('documents');
+                    this.dataDir = path.join(documentsPath, 'ChurchFinance');
+                    console.log('데이터 디렉토리 설정 완료:', this.dataDir);
                 } else {
-                    this.dataDir = __dirname;
+                    // 대체 경로: 사용자 홈 폴더의 Documents
+                    const os = require('os');
+                    this.dataDir = path.join(os.homedir(), 'Documents', 'ChurchFinance');
+                    console.log('대체 데이터 디렉토리 설정:', this.dataDir);
                 }
-            } catch (e) {
+            } else {
+                // 브라우저 환경에서는 현재 디렉토리
                 this.dataDir = __dirname;
+                console.log('브라우저 환경 데이터 디렉토리:', this.dataDir);
             }
-        } else {
-            this.dataDir = __dirname;
+        } catch (error) {
+            console.error('데이터 디렉토리 설정 오류:', error);
+            // 최후 수단: 사용자 홈 폴더
+            const os = require('os');
+            this.dataDir = path.join(os.homedir(), 'Documents', 'ChurchFinance');
+            console.log('최후 수단 데이터 디렉토리:', this.dataDir);
         }
         
         this.membersFile = path.join(this.dataDir, 'members.json');
@@ -58,14 +66,18 @@ class DataService {
             // 디렉토리가 없으면 생성
             if (!fs.existsSync(this.dataDir)) {
                 fs.mkdirSync(this.dataDir, { recursive: true });
+                console.log('데이터 디렉토리 생성:', this.dataDir);
             }
-            fs.writeFileSync(this.membersFile, JSON.stringify(this.members, null, 2), 'utf8');
+            const data = JSON.stringify(this.members, null, 2);
+            fs.writeFileSync(this.membersFile, data, 'utf8');
+            console.log('성도 데이터 저장 완료:', this.membersFile);
             return true;
         } catch (error) {
             console.error('성도 데이터 저장 오류:', error);
             console.error('저장 경로:', this.membersFile);
             console.error('데이터 디렉토리:', this.dataDir);
-            throw error; // 에러를 다시 던져서 상위에서 처리할 수 있도록
+            console.error('디렉토리 존재 여부:', fs.existsSync(this.dataDir));
+            throw error;
         }
     }
 
@@ -76,11 +88,18 @@ class DataService {
             id: Date.now(),
             registeredAt: new Date().toISOString()
         };
-        
-        this.members.push(newMember);
-        // 저장 실패해도 메모리에는 데이터가 추가되었으므로 newMember 반환
-        this.saveMembers();
-        return newMember;
+
+        try {
+            this.members.push(newMember);
+            this.saveMembers();
+            console.log('성도 추가 완료:', newMember);
+            return newMember;
+        } catch (error) {
+            // 저장 실패 시 메모리에서도 제거
+            this.members.pop();
+            console.error('성도 추가 중 오류:', error);
+            throw error;
+        }
     }
 
     // 성도 수정
@@ -151,8 +170,11 @@ class DataService {
             // 디렉토리가 없으면 생성
             if (!fs.existsSync(this.dataDir)) {
                 fs.mkdirSync(this.dataDir, { recursive: true });
+                console.log('데이터 디렉토리 생성:', this.dataDir);
             }
-            fs.writeFileSync(this.donationsFile, JSON.stringify(this.donations, null, 2), 'utf8');
+            const data = JSON.stringify(this.donations, null, 2);
+            fs.writeFileSync(this.donationsFile, data, 'utf8');
+            console.log('헌금 데이터 저장 완료:', this.donationsFile);
             return true;
         } catch (error) {
             console.error('헌금 데이터 저장 오류:', error);
@@ -169,11 +191,18 @@ class DataService {
             id: Date.now(),
             recordedAt: new Date().toISOString()
         };
-        
-        this.donations.push(newDonation);
-        // 저장 실패해도 메모리에는 데이터가 추가되었으므로 newDonation 반환
-        this.saveDonations();
-        return newDonation;
+
+        try {
+            this.donations.push(newDonation);
+            this.saveDonations();
+            console.log('헌금 추가 완료:', newDonation);
+            return newDonation;
+        } catch (error) {
+            // 저장 실패 시 메모리에서도 제거
+            this.donations.pop();
+            console.error('헌금 추가 중 오류:', error);
+            throw error;
+        }
     }
 
     // 헌금 수정
@@ -264,8 +293,11 @@ class DataService {
             // 디렉토리가 없으면 생성
             if (!fs.existsSync(this.dataDir)) {
                 fs.mkdirSync(this.dataDir, { recursive: true });
+                console.log('데이터 디렉토리 생성:', this.dataDir);
             }
-            fs.writeFileSync(this.expensesFile, JSON.stringify(this.expenses, null, 2), 'utf8');
+            const data = JSON.stringify(this.expenses, null, 2);
+            fs.writeFileSync(this.expensesFile, data, 'utf8');
+            console.log('지출 데이터 저장 완료:', this.expensesFile);
             return true;
         } catch (error) {
             console.error('지출 데이터 저장 오류:', error);
@@ -282,11 +314,18 @@ class DataService {
             id: Date.now(),
             recordedAt: new Date().toISOString()
         };
-        
-        this.expenses.push(newExpense);
-        // 저장 실패해도 메모리에는 데이터가 추가되었으므로 newExpense 반환
-        this.saveExpenses();
-        return newExpense;
+
+        try {
+            this.expenses.push(newExpense);
+            this.saveExpenses();
+            console.log('지출 추가 완료:', newExpense);
+            return newExpense;
+        } catch (error) {
+            // 저장 실패 시 메모리에서도 제거
+            this.expenses.pop();
+            console.error('지출 추가 중 오류:', error);
+            throw error;
+        }
     }
 
     // 지출 목록 반환
